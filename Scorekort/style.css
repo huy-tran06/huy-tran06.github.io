@@ -1,0 +1,196 @@
+.hidden {
+    display: none;
+}
+
+/* Global Variables */
+:root {
+    --bg-color: #121212;
+    --card-bg: #1E1E1E;
+    --text-color: #F5F5F5;
+    --primary: #00B4D8;
+    --primary-tap: #0077B6;
+    --shadow-color: rgba(255,255,255, 0.1);
+}
+
+
+/* Light Mode */
+body.light {
+    --bg-color: #F4F6F9;
+    --card-bg: #FFFFFF;
+    --text-color: #2B2D42;
+    --primary: #0077B6;
+    --primary-tap: #00B4D8;
+    --shadow-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Body */
+body {
+    font-family: "Segoe UI", 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    margin: 0;
+    padding: 1rem;
+    padding-bottom: 100px;
+    display: grid;
+    place-items: center;
+    min-height: 85vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#bottomBar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 5rem;
+    background-color: var(--card-bg);
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    place-items: center;
+    box-shadow: 0 -3px 15px var(--shadow-color);
+    z-index: 1000;
+}
+
+#bottomBar button{
+    background: none;
+    color: var(--text-color);
+    display: grid;
+    place-items: center;
+    font-size: 1.5rem
+}
+
+/* Containers */
+.container{ 
+    background-color: var(--card-bg);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 6px 18px var(--shadow-color);
+    text-align: center;
+    max-width: 350px;
+    width: 75%;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* H2 */
+h2 {
+    font-size: 2.5rem;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+}
+
+/* Text */
+p {
+    font-size: 1.5rem;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+}
+
+/* Rules List */
+.rules {
+    text-align: left;
+    color: var(--text-color);
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+.rules li {
+    margin: 0.4rem 0;
+}
+
+/* Buttons */
+button {
+    background-color: var(--primary);
+    color: #FFFFFF;
+    border: none;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border-radius: 10px;
+    font-size: 1.5rem;
+    width: 100%;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:active {
+    background-color: var(--primary-tap);
+    transform: scale(0.95);
+}
+
+
+/* Game Setup Page */
+#playerInputs {
+    margin-right: 0.5rem;
+}
+
+.player-input {
+    display: grid;
+    grid-template-columns: 1fr auto;
+}
+
+.player-input input {
+    width: 100%;
+    margin: 0.5rem;
+    padding: 0.5rem 0.8rem;
+    font-size: 1.25rem;
+    border: 1px solid #ccc;
+    border-radius: 10px 0 0 10px;
+    min-height: 2.5rem;
+}
+
+.player-input input::placeholder {
+    font-size: 1.25rem;
+    color: #999;
+}
+
+.remove-player {
+    color: #FF0000;
+    font-weight: 750;
+    padding: 1.25rem;
+    border-radius: 0 10px 10px 0;
+}
+
+/* Hole Screen */
+.player-score-row {
+    margin-bottom: 1rem;
+}
+
+.player-score-row label {
+    display: grid;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.score-controls {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+}
+
+.decrease-btn {
+    font-weight: 750;
+    padding: 1.25rem;
+    border-radius: 10px 0 0 10px;
+    min-height: 3rem;
+}
+
+.increase-btn {
+    font-weight: 750;
+    padding: 1.25rem;
+    border-radius: 0 10px 10px 0;
+    min-height: 3rem;
+}
+
+.score-controls input {
+    width: 100%;
+    text-align: center;
+    padding: 0.5rem 0;
+    font-size: 1.25rem;
+    border: 1px solid #ccc;
+    min-height: 3rem;
+}
+
+#resultsList {
+    padding: 0;
+}
+
+
+
