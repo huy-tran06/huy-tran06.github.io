@@ -203,6 +203,12 @@ button:active {
     min-height: 3rem;
 }
 
+#holeNav{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
 #resultsList {
     padding: 0;
 }
