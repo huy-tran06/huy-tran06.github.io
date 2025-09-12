@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scorekort</title>
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div id="welcome" class="container">
+        <h2>Välkommen</h2>
+        <p>Regler och information</p>
+        <ul class="rules">
+            <li>Regel 1</li>
+            <li>Regel 2</li>
+            <li>Regel 3</li>
+        </ul>
+        <button id="newGameBtn">Börja spela</button>
+        <button id="loadBtn">Ladda spel</button>
+    </div>
+
+    <div id="game" class="container hidden">
+        <h2>Redo att spela?</h2>
+        <p>Lägg till alla spelare och börja spela!</p>
+        
+        <div id="playerInputs"></div>
+    
+        <button id="addPlayerBtn">Lägg till spelare</button>
+        <button id="startGameBtn">Starta spelet</button>
+    </div>
+
+    <div id="holeScreen" class="container hidden">
+        <h2 id="holeTitle"></h2>
+        <p id="holeDesc"></p>
+        <p id="holePar"></p>
+
+        <div id="playerScores"></div>
+
+        <button id="previousHoleBtn">Tillbaka</button>
+        <button id="nextHoleBtn">Nästa</button>
+
+        <div id="results" class="hidden">
+            <h2>Resultat</h2>
+            <ul id="resultsList"></ul>
+            <p id="winner"></p>
+            <button id="closeResultsBtn">Stäng</button>
+        </div>
+
+        <button id="showResultsBtn">Visa Resultat</button>
+    </div>
+
+    <div id="newPlayerPage" class="container hidden">
+        <h2>Fler spelare som ville vara med?</h2>
+        <p>Lägg till nya spelare och fortsätt spela!</p>
+        
+        <div id="newPlayerInputs"></div>
+        
+        <button id="addNewPlayerBtn">Lägg till spelare</button>
+        <button id="continueGameBtn">Klart</button>
+    </div>
+
+<div id="bottomBar">
+    <button id="homeBtn">
+        <i class="material-icons">home</i>
+        <p>Hem</p>
+    </button>
+    <button id="newPlayerPageBtn">
+        <i class="material-icons">person_add</i>
+        <p>Lägg till</p>
+    </button>
+    <button id="themeToggle">☀️</button>
+    <button id="holeScreenBtn">
+        <i class="material-icons">play_arrow</i>
+        <p>Spela</p>
+    </button>
+    <button id="saveBtn">
+        <i class="material-icons">save</i>
+        <p>Spara</p>
+    </button>
+</div>
+    
+</body>
+</html>

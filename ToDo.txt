@@ -1,0 +1,2 @@
+- make next and previous buttons look better
+- fix being able to add "invisible" players
