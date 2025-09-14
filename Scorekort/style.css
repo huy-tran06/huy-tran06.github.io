@@ -209,6 +209,15 @@ button:active {
     gap: 1rem;
 }
 
+#holeNav button{
+    display: grid;
+    place-items: center;
+}
+
+#holeNav .material-icons{
+    font-size: 1.85rem;
+}
+
 #resultsList {
     padding: 0;
 }

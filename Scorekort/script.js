@@ -7,6 +7,8 @@ const newGameBtn = document.querySelector("#newGameBtn");
 newGameBtn.addEventListener("click", () => {
     welcomePage.classList.add("hidden");
     gamePage.classList.remove("hidden");
+
+    createDefaultPlayers();
 });
 
 
@@ -46,7 +48,6 @@ function createDefaultPlayers() {
         createPlayerInput();
     }
 }
-createDefaultPlayers();
 
 addPlayerBtn.addEventListener("click", createPlayerInput);
 
@@ -64,10 +65,10 @@ async function loadHoles() {
 
         players = [];
         const inputs = document.querySelectorAll("#playerInputs input");
-        inputs.forEach((input, index) => {
+        inputs.forEach((input) => {
             if (input.value.trim() !== "") {
                 players.push({
-                id: "id_" + (index + 1),
+                id: "id_" + Date.now(),
                 name: input.value.trim(),
                 scores: Array(holes.length).fill(null)
                 });
@@ -168,14 +169,7 @@ const previousHoleBtn = document.querySelector("#previousHoleBtn");
 
 
 nextHoleBtn.addEventListener("click", () => {
-    const inputs = document.querySelectorAll("#playerScores input");
-    inputs.forEach((input, index) => {
-        const value = parseInt(input.value);
-        if (input.value !== "" && value > 0) {
-            players[index].scores[currentHole] = value;
-        }
-    })
-
+    updateScores(players);
     console.log(players);
 
     if (currentHole == holes.length - 1){
@@ -192,14 +186,7 @@ nextHoleBtn.addEventListener("click", () => {
 })
 
 previousHoleBtn.addEventListener("click", () => {
-    const inputs = document.querySelectorAll("#playerScores input");
-    inputs.forEach((input, index) => {
-        const value = parseInt(input.value);
-        if (input.value !== "" && value > 0) {
-            players[index].scores[currentHole] = value;
-        }
-    })
-
+    updateScores(players);
     console.log(players);
     
     if (currentHole == 0){
@@ -275,15 +262,10 @@ function renderResults() {
 
 // Result button
 showResultsBtn.addEventListener("click", () => {
-    const inputs = document.querySelectorAll("#playerScores input");
-        inputs.forEach((input, index) => {
-            const value = parseInt(input.value);
-            if (input.value !== "" && value >= 0) {
-                players[index].scores[currentHole] = value;
-            }
-    })
+    updateScores(players);
     console.log(players);
     renderResults();
+
     resultsSection.classList.remove("hidden");
     showResultsBtn.classList.add("hidden");
 })
@@ -399,7 +381,7 @@ function renderNewPlayers () {
 }
 
 addNewPlayerBtn.addEventListener("click", () => {
-    const newId = "id_" + (players.length + 1);
+    const newId = "id_" + Date.now();
 
     players.push({
         id: newId,
@@ -411,6 +393,8 @@ addNewPlayerBtn.addEventListener("click", () => {
 })
 
 continueGameBtn.addEventListener("click", () => {
+    players = players.filter(player => player.name.trim() !== "");
+
     newPlayerPage.classList.add("hidden");
     currentHole = 0;
     showHole();
@@ -430,7 +414,38 @@ themeToggle.addEventListener("click", () => {
 });
 
 holeScreenBtn.addEventListener("click", () => {
-    loadHoles();
+    showHole();
 });
+
+
+
+function updateScores(players) {
+    const inputs = document.querySelectorAll("#playerScores input");
+        inputs.forEach((input, index) => {
+            const value = parseInt(input.value);
+
+            if (input.value !== "" && value >= 0) {
+                players[index].scores[currentHole] = value;
+            }
+    })
+
+
+    if (players.length === 0)
+        return;
+    
+
+    const numHoles = players[0].scores.length;
+    for (let holeIndex = 0; holeIndex < numHoles; holeIndex++){
+        const allUnplayed = players.every(player =>
+            player.scores[holeIndex] === 0 || player.scores[holeIndex] === null
+        );
+
+        if (allUnplayed) {
+            players.forEach(player => {
+                player.scores[holeIndex] = null;
+            });
+        }
+    }
+}
 
 
