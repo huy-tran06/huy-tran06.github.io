@@ -162,6 +162,9 @@ function showHole() {
     newPlayerPage.classList.add("hidden");
     holeScreen.classList.remove("hidden");
     
+
+    newGameBtn.disabled = true;
+    loadBtn.disabled = true;
 }
 
 const nextHoleBtn = document.querySelector("#nextHoleBtn");

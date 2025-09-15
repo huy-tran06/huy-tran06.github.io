@@ -9,6 +9,8 @@
     --text-color: #F5F5F5;
     --primary: #00B4D8;
     --primary-tap: #0077B6;
+    --disabled: #333;
+    --disabled-text: #777;
     --shadow-color: rgba(255,255,255, 0.1);
 }
 
@@ -20,6 +22,8 @@ body.light {
     --text-color: #2B2D42;
     --primary: #0077B6;
     --primary-tap: #00B4D8;
+    --disabled: #ccc;
+    --disabled-text: #666;
     --shadow-color: rgba(0, 0, 0, 0.2);
 }
 
@@ -127,6 +131,16 @@ button {
 button:active {
     background-color: var(--primary-tap);
     transform: scale(0.95);
+}
+
+button:disabled {
+    background-color: var(--disabled);
+    color: var(--disabled-text)
+}
+
+button:disabled:active {
+    background-color: var(--disabled);
+    transform: scale(1);
 }
 
 
