@@ -63,7 +63,7 @@ async function loadHoles() {
         const data = await res.json();
         holes = data.court;
 
-        players = [];
+        // players = [];
         const inputs = document.querySelectorAll("#playerInputs input");
         inputs.forEach((input) => {
             if (input.value.trim() !== "") {
