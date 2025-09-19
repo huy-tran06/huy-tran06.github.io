@@ -63,7 +63,7 @@ async function loadHoles() {
         const data = await res.json();
         holes = data.court;
 
-        players = [];
+        // players = [];
         const inputs = document.querySelectorAll("#playerInputs input");
         inputs.forEach((input) => {
             if (input.value.trim() !== "") {
@@ -162,6 +162,9 @@ function showHole() {
     newPlayerPage.classList.add("hidden");
     holeScreen.classList.remove("hidden");
     
+
+    newGameBtn.disabled = true;
+    loadBtn.disabled = true;
 }
 
 const nextHoleBtn = document.querySelector("#nextHoleBtn");

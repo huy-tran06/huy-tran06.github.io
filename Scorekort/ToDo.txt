@@ -1,1 +1,4 @@
-
+- Add automatic save
+- Style the disabled buttons
+- FIX || Spam start game button == a bunch of input boxes
+- Screw the disabled buttons. Remove the buttons when game starts and add a "Continue Game" button instead.
