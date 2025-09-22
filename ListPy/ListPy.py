@@ -14,16 +14,19 @@ class List:
             new_data = [None] * new_capacity
 
             for i in range(self._size):
-                new_data[i] = self._data[1]
+                new_data[i] = self._data[i]
         
             self._data = new_data
             self._capacity = new_capacity
 
-        pass
+        self._data[self._size] = value
+        self._size += 1
  
     def insert(self, index, value):
         """Lägg in ett värde på en viss position."""
         # TODO: flytta elementen åt höger, sätt in värdet på rätt plats
+
+        
         pass
  
     def remove(self, value):
