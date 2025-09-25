@@ -10,7 +10,7 @@ class List:
         # TODO: kolla om arrayen är full -> skapa ny, större array och kopiera
 
         if self._size == self._capacity:
-            new_capacity = self._capacity + 5
+            new_capacity = self._capacity * 2
             new_data = [None] * new_capacity
 
             for i in range(self._size):
@@ -26,8 +26,22 @@ class List:
         """Lägg in ett värde på en viss position."""
         # TODO: flytta elementen åt höger, sätt in värdet på rätt plats
 
+        if self._size == self._capacity:
+            new_capacity = self._capacity * 2
+            new_data = [None] * new_capacity
+
+            for i in range(self._size):
+                new_data[i] = self._data[i]
         
-        pass
+            self._data = new_data
+            self._capacity = new_capacity
+
+        for i in range(self._size, index, -1):
+            self._data[i] = self._data[i -1]
+
+        self._data[index] = value
+        self._size += 1
+        
  
     def remove(self, value):
         """Ta bort första förekomsten av ett värde."""
