@@ -4,11 +4,8 @@ class List:
         self._data = [None] * capacity   # "array" med defaultvärden
         self._size = 0                   # antal faktiska element
         self._capacity = capacity
- 
-    def append(self, value):
-        """Lägg till ett värde sist i listan."""
-        # TODO: kolla om arrayen är full -> skapa ny, större array och kopiera
 
+    def checkIfFull(self):
         if self._size == self._capacity:
             new_capacity = self._capacity * 2
             new_data = [None] * new_capacity
@@ -18,7 +15,11 @@ class List:
         
             self._data = new_data
             self._capacity = new_capacity
-
+ 
+    def append(self, value):
+        """Lägg till ett värde sist i listan."""
+        # TODO: kolla om arrayen är full -> skapa ny, större array och kopiera
+        self.checkIfFull()
         self._data[self._size] = value
         self._size += 1
  
@@ -26,15 +27,7 @@ class List:
         """Lägg in ett värde på en viss position."""
         # TODO: flytta elementen åt höger, sätt in värdet på rätt plats
 
-        if self._size == self._capacity:
-            new_capacity = self._capacity * 2
-            new_data = [None] * new_capacity
-
-            for i in range(self._size):
-                new_data[i] = self._data[i]
-        
-            self._data = new_data
-            self._capacity = new_capacity
+        self.checkIfFull()
 
         for i in range(self._size, index, -1):
             self._data[i] = self._data[i -1]
@@ -46,6 +39,8 @@ class List:
     def remove(self, value):
         """Ta bort första förekomsten av ett värde."""
         # TODO: hitta index för värdet, flytta elementen åt vänster
+
+        
         pass
  
     def pop(self):
