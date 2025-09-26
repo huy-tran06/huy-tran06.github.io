@@ -39,7 +39,14 @@ class List:
     def remove(self, value):
         """Ta bort första förekomsten av ett värde."""
         # TODO: hitta index för värdet, flytta elementen åt vänster
+        soonDeleted = -1
+        for i in range(self._size):
+            if self._data[i] == value:
+                soonDeleted = i
+                break
 
+        for i in range():
+            pass
         
         pass
  
