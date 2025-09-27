@@ -16,10 +16,16 @@ class List:
             self._data = new_data
             self._capacity = new_capacity
  
+    def checkIndexValidity(self, index):
+        if index < 0 or index >= self._size:
+            raise IndexError("Index out of bounds.") 
+
     def append(self, value):
         """Lägg till ett värde sist i listan."""
         # TODO: kolla om arrayen är full -> skapa ny, större array och kopiera
+
         self.checkIfFull()
+
         self._data[self._size] = value
         self._size += 1
  
@@ -27,6 +33,7 @@ class List:
         """Lägg in ett värde på en viss position."""
         # TODO: flytta elementen åt höger, sätt in värdet på rätt plats
 
+        self.checkIndexValidity()
         self.checkIfFull()
 
         for i in range(self._size, index, -1):
@@ -35,7 +42,6 @@ class List:
         self._data[index] = value
         self._size += 1
         
- 
     def remove(self, value):
         """Ta bort första förekomsten av ett värde."""
         # TODO: hitta index för värdet, flytta elementen åt vänster
@@ -45,14 +51,31 @@ class List:
                 soonDeleted = i
                 break
 
-        for i in range():
-            pass
+        if soonDeleted == -1:
+            raise ValueError(f"{value} not found in list.")
+
+        for i in range(soonDeleted, self._size - 1):
+            self._data[i] = self._data[i + 1]
         
-        pass
+        self._data[self._size - 1] = None
+        self._size -= 1
  
-    def pop(self):
+    def pop(self, index = None):
         """Ta bort och returnera elementet på en viss position (eller sist)."""
-        pass
+        
+        if index is None:
+            index = self._size - 1
+
+        self.checkIndexValidity(index)
+
+        value = self._data[index]
+
+        for i in range(index, self._size - 1):
+            self._data[i] = self._data[i + 1]
+
+        self._data[self._size - 1] = None
+        self._size -= 1
+        return value
  
     def get(self, index):
         """Returnera värdet på en viss position."""
