@@ -37,7 +37,7 @@ class List:
         self.checkIfFull()
 
         for i in range(self._size, index, -1):
-            self._data[i] = self._data[i -1]
+            self._data[i] = self._data[i - 1]
 
         self._data[index] = value
         self._size += 1
@@ -105,3 +105,10 @@ class List:
         return str(values)
  
 l = List()
+l.append(10)
+l.append(20)
+l.append(30)
+l.append(40)
+l.append(50)
+
+print(l.__str__())
