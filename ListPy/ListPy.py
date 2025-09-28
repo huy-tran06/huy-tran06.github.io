@@ -79,22 +79,29 @@ class List:
  
     def get(self, index):
         """Returnera värdet på en viss position."""
-        pass
+
+        self.checkIndexValidity(index)
+        return self._data[index]
  
     def set(self, index, value):
         """Ändra värdet på en viss position."""
-        pass
+
+        self.checkIndexValidity(index)
+        self._data[index] = value
  
     def size(self):
         """Returnerar antal element."""
-        pass
+
+        return self._size
  
     def isEmpty(self):
         """Returnerar True/False beroende på om listan är tom."""
-        pass
+        
+        return self._size == 0
  
     def __str__(self):
         """Returnerar en strängrepresentation, t.ex. [1, 2, 3]."""
-    pass
+        values = [self._data[i] for i in range(self._size)]
+        return str(values)
  
 l = List()
