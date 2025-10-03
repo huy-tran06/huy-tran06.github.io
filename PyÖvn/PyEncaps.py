@@ -13,10 +13,25 @@ class Account:
     def username(self):
         return self.__username
 
-    @username.setter
-    def username(self, new_username):
-        if len(new_username) > 0:
-            self.__username = new_username
+    @property
+    def password(self):
+        return self.__password
+    
+    @password.setter
+    def password(self, new_password):
+        if len(new_password) >= 6:
+            self.__password = new_password
+
+    @property
+    def role(self):
+        return self.__role
+    
+    @role.setter
+    def role(self, new_role):
+        allowed = ["admin", "member", "guest"]
+        if new_role.lower() in allowed:
+            self.__role = new_role
+
 
     def __str__(self):
         if self.__active == True:
