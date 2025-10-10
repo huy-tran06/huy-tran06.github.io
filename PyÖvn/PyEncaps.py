@@ -45,13 +45,10 @@ class Account:
         self.__active = True
 
     def is_active(self):
-        if self.__active == True:
-            return True
-        if self.__active == False:
-            return False
+        return self.__active
         
     def authenticate(self, username, password):
-        if username == self.__username & password == self.__password:
+        if username == self.__username and password == self.__password:
             return True
         else:
             return False
@@ -61,6 +58,53 @@ class Account:
         return cls.__account_count
 
 
-account1 = Account("Huy","1234567")
-account1.role = "Admin"
-print(account1.role)
+account1 = Account("Huy","1234567","Admin")
+print(account1.username)
+
+
+accounts = []
+
+while True:
+    
+    print(" ")
+    print("1. Create a new account")
+    print("2. Show all accounts")
+    print("3. Change password")
+    print("4. Inactivate account")
+    print("5. Activate account")
+    print("6. Authenticate user")
+    print("7. Show account count")
+    print("8. Close")
+    print(" ")
+
+    val = input("Choose one option: ")
+    
+    if val == "1":
+        username = input("Username: ")
+        password = input("Password: ")
+        role = input("Role (Admin, Member or Guest): ")
+
+        try:
+            account = Account(username, password, role)
+            accounts.append(account)
+            print("Account successfully created!")
+        except ValueError as error:
+            print(error)
+
+    elif val == "2":
+        print(" ")
+        print("All created accounts:")
+        for account in accounts:
+            print(account)
+
+    elif val == "3":
+        username = input("Username: ")
+        new_password = input("New password: ")
+        for account in accounts:
+            if account.username == username:
+                account.password = new_password
+                print("Password changed!")
+
+    elif val == "8":
+        print("Shutting down...")
+        break
