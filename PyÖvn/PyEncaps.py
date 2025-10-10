@@ -91,19 +91,70 @@ while True:
         except ValueError as error:
             print(error)
 
+
     elif val == "2":
         print(" ")
         print("All created accounts:")
+
         for account in accounts:
             print(account)
+
 
     elif val == "3":
         username = input("Username: ")
         new_password = input("New password: ")
+        found = False
+
         for account in accounts:
             if account.username == username:
                 account.password = new_password
                 print("Password changed!")
+                found = True
+
+        if found == False:
+            print("Account not found.")
+
+
+    elif val == "4":
+        username = input("Username: ")
+        found = False
+
+        for account in accounts: 
+            if account.username == username:
+                account.inactivate()
+                print("Account inactivated!")
+                found = True
+
+        if found == False:
+            print("Account not found.")
+
+
+    elif val == "5":
+        username = input("Username: ")
+        found = False
+
+        for account in accounts:
+            if account.username == username:
+                account.activate()
+                print("Account activated!")
+                found = True
+
+        if found == False:
+            print("Account not found.")
+
+
+    elif val == "6":
+        username = input("Username: ")
+        password = input("Password: ")
+        found = False
+
+        for account in accounts:
+            if account.username == username:
+                account.authenticate()
+
+        if found == False:
+            print("Account not found")
+
 
     elif val == "8":
         print("Shutting down...")
