@@ -77,9 +77,9 @@ while True:
     print("8. Close")
     print(" ")
 
-    val = input("Choose one option: ")
+    choice = input("Choose one option: ")
     
-    if val == "1":
+    if choice == "1":
         username = input("Username: ")
         password = input("Password: ")
         role = input("Role (Admin, Member or Guest): ")
@@ -92,7 +92,7 @@ while True:
             print(error)
 
 
-    elif val == "2":
+    elif choice == "2":
         print(" ")
         print("All created accounts:")
 
@@ -100,7 +100,7 @@ while True:
             print(account)
 
 
-    elif val == "3":
+    elif choice == "3":
         username = input("Username: ")
         new_password = input("New password: ")
         found = False
@@ -115,7 +115,7 @@ while True:
             print("Account not found.")
 
 
-    elif val == "4":
+    elif choice == "4":
         username = input("Username: ")
         found = False
 
@@ -129,7 +129,7 @@ while True:
             print("Account not found.")
 
 
-    elif val == "5":
+    elif choice == "5":
         username = input("Username: ")
         found = False
 
@@ -143,7 +143,7 @@ while True:
             print("Account not found.")
 
 
-    elif val == "6":
+    elif choice == "6":
         username = input("Username: ")
         password = input("Password: ")
         found = False
@@ -155,7 +155,10 @@ while True:
         if found == False:
             print("Account not found")
 
+    elif choice == "7":
+        print(f"Account count: {account.account_count()}")
 
-    elif val == "8":
+
+    elif choice == "8":
         print("Shutting down...")
         break
