@@ -103,12 +103,37 @@ class List:
         """Returnerar en strängrepresentation, t.ex. [1, 2, 3]."""
         values = [self._data[i] for i in range(self._size)]
         return str(values)
+    
+    def __iter__(self):
+        for i in range(self._size):
+            yield self._data[i]
  
-l = List()
-l.append(10)
-l.append(20)
-l.append(30)
-l.append(40)
-l.append(50)
+veckodagar = List()
+veckodagar.append("mån")
+veckodagar.append("tis")
+veckodagar.append("ons")
+veckodagar.append("tors")
+veckodagar.append("fre")
+veckodagar.append("lör")
+veckodagar.append("sön")
 
-print(l.__str__())
+
+vecka = tuple(veckodagar)
+två_veckor = vecka + vecka
+
+# print(två_veckor)
+
+
+kurser = List()
+kurser.append("Svenska 3")
+kurser.append("Engelska 7")
+kurser.append("Matte 4")
+kurser.append("Matte 5")
+kurser.append("Fysik 2")
+kurser.append("Företagsekonomi")
+kurser.append("Psykologi")
+kurser.append("Cisco")
+kurser.append("Webbutveckling")
+
+mina_kurser = set(kurser)
+print(mina_kurser)
