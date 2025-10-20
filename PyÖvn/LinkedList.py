@@ -42,8 +42,27 @@ class LinkedList:
 
         if index > 0:
             new_node = Node(value)
+            e = self._head
 
-            return
+            for i in range(index-1):
+                e = e._next
+            
+            new_node._next = e._next
+            e._next = new_node
+
+            self._length += 1
+
+    def remove(self, value):
+        current = self._head
+        previous = None
+
+        for i in range(self._length):
+            previous = current
+            current = current._next
+            
+
+    def size(self):
+        return self._length
 
     def isEmpty(self):
         return self._head is None
