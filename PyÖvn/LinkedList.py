@@ -42,13 +42,13 @@ class LinkedList:
 
         if index > 0:
             new_node = Node(value)
-            e = self._head
+            current = self._head
 
             for i in range(index-1):
-                e = e._next
+                current = current._next
             
-            new_node._next = e._next
-            e._next = new_node
+            new_node._next = current._next
+            current._next = new_node
 
             self._length += 1
 
@@ -57,6 +57,8 @@ class LinkedList:
         previous = None
 
         for i in range(self._length):
+            if current._value == value:
+                pass
             previous = current
             current = current._next
             
