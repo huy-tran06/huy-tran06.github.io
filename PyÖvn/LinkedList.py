@@ -56,13 +56,45 @@ class LinkedList:
         current = self._head
         previous = None
 
-        for i in range(self._length):
+        while current:
             if current._value == value:
-                pass
+                if previous is None:
+                    self._head = current._next
+                    self._length -= 1
+                    return
+
+                if current._next is None:
+                    self._tail = previous
+                    previous._next = None
+                    self._length -= 1
+                    return
+
+                previous._next = current._next
+                self._length -= 1
+                return
+
             previous = current
             current = current._next
-            
 
+    def pop(self):
+        current = self._head
+        value = self._tail._value
+
+        if self._head == self._tail:
+            self._head = None
+            self._tail = None
+            self._length = 0
+            return value
+
+        while current:
+            if current._next == self._tail:
+                current._next = None
+                self._tail = current
+                self._length -= 1
+                return value
+
+            current = current._next
+        
     def size(self):
         return self._length
 
