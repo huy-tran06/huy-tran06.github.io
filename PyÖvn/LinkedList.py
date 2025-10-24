@@ -130,7 +130,6 @@ class LinkedList:
             current = current._next
 
         return linkedList
-    
 
 ll = LinkedList()
 
