@@ -100,3 +100,44 @@ class LinkedList:
 
     def isEmpty(self):
         return self._head is None
+    
+    def find(self, value):
+        current = self._head
+
+        for i in range(self._length):
+            if current._value == value:
+                return i
+            current = current._next
+
+        return -1
+    
+    def get(self, index):
+        if index < 0 or index >= self._length:
+            return None
+
+        current = self._head
+        for i in range(index):
+            current = current._next
+
+        return current._value
+    
+    def to_list(self):
+        current = self._head
+        linkedList = []
+
+        while current:
+            linkedList.append(current._value)
+            current = current._next
+
+        return linkedList
+    
+
+ll = LinkedList()
+
+ll.append(10)
+ll.append(20)
+ll.prepend(5)
+ll.insert(2, 15)
+
+print(ll.get(3))
+print(ll.to_list())
