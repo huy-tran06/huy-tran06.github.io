@@ -35,7 +35,20 @@ def selection_sort():
 
 #Insertion Sort
 def insertion_sort():
-    pass
+    list = random_list.copy()
+    
+    for i in range(1, len(list)):
+        the_one_moving = list[i]
+        o = i - 1
 
-bubble_sort()
-selection_sort()
+        while(o >= 0 and list[o] > the_one_moving):
+            list[o + 1] = list[o]
+            o -= 1
+    
+        list[o + 1] = the_one_moving
+    return print(list)
+
+print(random_list)
+# bubble_sort()
+# selection_sort()
+insertion_sort()
