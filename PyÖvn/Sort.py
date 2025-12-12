@@ -51,4 +51,4 @@ def insertion_sort():
 print(random_list)
 # bubble_sort()
 # selection_sort()
-insertion_sort()
+# insertion_sort()
