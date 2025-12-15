@@ -1,15 +1,58 @@
 import random
 
-# List with random numbers
-random_list = []
-for i in range(50):
-    random_list.append(random.randint(1, 10000))
+chosen_list = []
 
-length_minus_one = len(random_list) - 1
+# List with random numbers
+def gen_list1():
+    random_list = []
+
+    for i in range(50):
+        random_list.append(random.randint(1, 1000))
+    
+    return random_list
+    
+# List with a few unique numbers
+def gen_list2():
+    test_list2 = []
+
+    for i in range(50):
+        test_list2.append(random.randint(0, 3))
+    
+    return test_list2
+
+# Mostly organized list
+def gen_list3():
+    test_list3 = []
+
+    for i in range(50):
+        test_list3.append(i)
+
+    inserts = len(test_list3) // 10
+
+    for o in range(inserts):
+        value = random.randint(0, 100)
+        position = random.randint(0, len(test_list3))
+        test_list3.insert(position, value)
+
+    return test_list3
+
+# Backwards sorted list
+def gen_list4():
+    test_list4 = []
+    i = 50
+    
+    while i >= 0:
+        test_list4.append(i)
+        i -= 1
+
+    return test_list4
+
+length_minus_one = len(chosen_list) - 1
+
 
 # Bubble Sort
 def bubble_sort():
-    list = random_list.copy()
+    list = chosen_list.copy()
 
     for i in range(length_minus_one):
         for o in range(length_minus_one - i):
@@ -20,7 +63,7 @@ def bubble_sort():
 
 #Selection Sort
 def selection_sort():
-    list = random_list.copy()
+    list = chosen_list.copy()
 
     for i in range(length_minus_one):
         smallest = i
@@ -35,7 +78,7 @@ def selection_sort():
 
 #Insertion Sort
 def insertion_sort():
-    list = random_list.copy()
+    list = chosen_list.copy()
     
     for i in range(1, len(list)):
         the_one_moving = list[i]
@@ -48,7 +91,11 @@ def insertion_sort():
         list[o + 1] = the_one_moving
     return print(list)
 
-print(random_list)
+print(gen_list1())
+print(gen_list2())
+print(gen_list3())
+print(gen_list4())
+# print(chosen_list)
 # bubble_sort()
 # selection_sort()
 # insertion_sort()
