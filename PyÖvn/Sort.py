@@ -1,4 +1,5 @@
 import random
+import time
 
 chosen_list = []
 
@@ -47,23 +48,24 @@ def gen_list4():
 
     return test_list4
 
-length_minus_one = len(chosen_list) - 1
 
 
 # Bubble Sort
 def bubble_sort():
     list = chosen_list.copy()
+    length_minus_one = len(list) - 1
 
     for i in range(length_minus_one):
         for o in range(length_minus_one - i):
             if (list[o] > list[o + 1]):
                 list[o], list[o + 1] = list[o + 1], list[o]
 
-    return print(list)
+    return list
 
 #Selection Sort
 def selection_sort():
     list = chosen_list.copy()
+    length_minus_one = len(list) - 1
 
     for i in range(length_minus_one):
         smallest = i
@@ -74,7 +76,7 @@ def selection_sort():
         
         list[i], list[smallest] = list[smallest], list[i]
 
-    return print(list)
+    return list
 
 #Insertion Sort
 def insertion_sort():
@@ -89,13 +91,31 @@ def insertion_sort():
             o -= 1
     
         list[o + 1] = the_one_moving
-    return print(list)
+    return list
 
-print(gen_list1())
-print(gen_list2())
-print(gen_list3())
-print(gen_list4())
-# print(chosen_list)
-# bubble_sort()
-# selection_sort()
-# insertion_sort()
+chosen_list = gen_list1()
+print("Random numbers:", chosen_list)
+print(bubble_sort())
+print(selection_sort())
+print(insertion_sort())
+
+
+chosen_list = gen_list2()
+print("Few unique numbers:", chosen_list)
+print(bubble_sort())
+print(selection_sort())
+print(insertion_sort())
+
+
+chosen_list = gen_list3()
+print("Mostly organized list:", chosen_list)
+print(bubble_sort())
+print(selection_sort())
+print(insertion_sort())
+
+
+chosen_list = gen_list4()
+print("Backwards sorted list:", chosen_list)
+print(bubble_sort())
+print(selection_sort())
+print(insertion_sort())
