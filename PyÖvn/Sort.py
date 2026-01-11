@@ -7,8 +7,8 @@ chosen_list = []
 def gen_list1():
     random_list = []
 
-    for i in range(10000):
-        random_list.append(random.randint(1, 100000))
+    for i in range(20000):
+        random_list.append(random.randint(1, 200000))
     
     return random_list
     
@@ -16,7 +16,7 @@ def gen_list1():
 def gen_list2():
     test_list2 = []
 
-    for i in range(10000):
+    for i in range(20000):
         test_list2.append(random.randint(0, 3))
     
     return test_list2
@@ -25,13 +25,13 @@ def gen_list2():
 def gen_list3():
     test_list3 = []
 
-    for i in range(10000):
+    for i in range(20000):
         test_list3.append(i)
 
     inserts = len(test_list3) // 10
 
     for o in range(inserts):
-        value = random.randint(0, 1000)
+        value = random.randint(0, 2000)
         position = random.randint(0, len(test_list3))
         test_list3.insert(position, value)
 
@@ -40,7 +40,7 @@ def gen_list3():
 # Backwards sorted list
 def gen_list4():
     test_list4 = []
-    i = 10000
+    i = 20000
     
     while i >= 0:
         test_list4.append(i)
