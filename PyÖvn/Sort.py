@@ -7,8 +7,8 @@ chosen_list = []
 def gen_list1():
     random_list = []
 
-    for i in range(50):
-        random_list.append(random.randint(1, 1000))
+    for i in range(10000):
+        random_list.append(random.randint(1, 100000))
     
     return random_list
     
@@ -16,7 +16,7 @@ def gen_list1():
 def gen_list2():
     test_list2 = []
 
-    for i in range(50):
+    for i in range(10000):
         test_list2.append(random.randint(0, 3))
     
     return test_list2
@@ -25,13 +25,13 @@ def gen_list2():
 def gen_list3():
     test_list3 = []
 
-    for i in range(50):
+    for i in range(10000):
         test_list3.append(i)
 
     inserts = len(test_list3) // 10
 
     for o in range(inserts):
-        value = random.randint(0, 100)
+        value = random.randint(0, 1000)
         position = random.randint(0, len(test_list3))
         test_list3.insert(position, value)
 
@@ -40,7 +40,7 @@ def gen_list3():
 # Backwards sorted list
 def gen_list4():
     test_list4 = []
-    i = 50
+    i = 10000
     
     while i >= 0:
         test_list4.append(i)
@@ -55,18 +55,21 @@ def bubble_sort():
     list = chosen_list.copy()
     length_minus_one = len(list) - 1
 
+    start = time.perf_counter()
     for i in range(length_minus_one):
         for o in range(length_minus_one - i):
             if (list[o] > list[o + 1]):
                 list[o], list[o + 1] = list[o + 1], list[o]
+    result = round(time.perf_counter() - start, 2)
 
-    return list
+    return result
 
 #Selection Sort
 def selection_sort():
     list = chosen_list.copy()
     length_minus_one = len(list) - 1
 
+    start = time.perf_counter()
     for i in range(length_minus_one):
         smallest = i
 
@@ -75,13 +78,15 @@ def selection_sort():
                 smallest = o
         
         list[i], list[smallest] = list[smallest], list[i]
+    result = round(time.perf_counter() - start, 2)
 
-    return list
+    return result
 
 #Insertion Sort
 def insertion_sort():
     list = chosen_list.copy()
     
+    start = time.perf_counter()
     for i in range(1, len(list)):
         the_one_moving = list[i]
         o = i - 1
@@ -91,31 +96,37 @@ def insertion_sort():
             o -= 1
     
         list[o + 1] = the_one_moving
-    return list
+    result = round(time.perf_counter() - start, 2)
+
+    return result
 
 chosen_list = gen_list1()
-print("Random numbers:", chosen_list)
-print(bubble_sort())
-print(selection_sort())
-print(insertion_sort())
+print("Random numbers:")
+print("Bubble sort:", bubble_sort(), "s")
+print("Selection sort:", selection_sort(), "s")
+print("Insertion sort:", insertion_sort(), "s")
+print("")
 
 
 chosen_list = gen_list2()
-print("Few unique numbers:", chosen_list)
-print(bubble_sort())
-print(selection_sort())
-print(insertion_sort())
+print("Few unique numbers:")
+print("Bubble sort:", bubble_sort(), "s")
+print("Selection sort:", selection_sort(), "s")
+print("Insertion sort:", insertion_sort(), "s")
+print("")
 
 
 chosen_list = gen_list3()
-print("Mostly organized list:", chosen_list)
-print(bubble_sort())
-print(selection_sort())
-print(insertion_sort())
+print("Mostly organized list:")
+print("Bubble sort:", bubble_sort(), "s")
+print("Selection sort:", selection_sort(), "s")
+print("Insertion sort:", insertion_sort(), "s")
+print("")
 
 
 chosen_list = gen_list4()
-print("Backwards sorted list:", chosen_list)
-print(bubble_sort())
-print(selection_sort())
-print(insertion_sort())
+print("Backwards sorted list:")
+print("Bubble sort:", bubble_sort(), "s")
+print("Selection sort:", selection_sort(), "s")
+print("Insertion sort:", insertion_sort(), "s")
+print("")
