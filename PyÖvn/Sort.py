@@ -21,7 +21,7 @@ def gen_list2():
     
     return test_list2
 
-# Mostly organized list
+# Mostly organized lst
 def gen_list3():
     test_list3 = []
 
@@ -37,7 +37,7 @@ def gen_list3():
 
     return test_list3
 
-# Backwards sorted list
+# Backwards sorted lst
 def gen_list4():
     test_list4 = []
     i = 20000
@@ -52,52 +52,62 @@ def gen_list4():
 
 # Bubble Sort
 def bubble_sort():
-    list = chosen_list.copy()
-    length_minus_one = len(list) - 1
+    lst = chosen_list.copy()
+    length_minus_one = len(lst) - 1
 
     start = time.perf_counter()
     for i in range(length_minus_one):
         for o in range(length_minus_one - i):
-            if (list[o] > list[o + 1]):
-                list[o], list[o + 1] = list[o + 1], list[o]
+            if (lst[o] > lst[o + 1]):
+                lst[o], lst[o + 1] = lst[o + 1], lst[o]
     result = round(time.perf_counter() - start, 2)
 
     return result
 
 #Selection Sort
 def selection_sort():
-    list = chosen_list.copy()
-    length_minus_one = len(list) - 1
+    lst = chosen_list.copy()
+    length_minus_one = len(lst) - 1
 
     start = time.perf_counter()
     for i in range(length_minus_one):
         smallest = i
 
-        for o in range(i + 1, len(list)):
-            if (list[o] < list[smallest]):
+        for o in range(i + 1, len(lst)):
+            if (lst[o] < lst[smallest]):
                 smallest = o
         
-        list[i], list[smallest] = list[smallest], list[i]
+        lst[i], lst[smallest] = lst[smallest], lst[i]
     result = round(time.perf_counter() - start, 2)
 
     return result
 
 #Insertion Sort
 def insertion_sort():
-    list = chosen_list.copy()
+    lst = chosen_list.copy()
     
     start = time.perf_counter()
-    for i in range(1, len(list)):
-        the_one_moving = list[i]
+    for i in range(1, len(lst)):
+        the_one_moving = lst[i]
         o = i - 1
 
-        while(o >= 0 and list[o] > the_one_moving):
-            list[o + 1] = list[o]
+        while(o >= 0 and lst[o] > the_one_moving):
+            lst[o + 1] = lst[o]
             o -= 1
     
-        list[o + 1] = the_one_moving
+        lst[o + 1] = the_one_moving
     result = round(time.perf_counter() - start, 2)
 
+    return result
+
+#Python Sort
+def python_sort():
+    lst = chosen_list.copy()
+
+    start = time.perf_counter()
+    lst.sort()
+    result = round(time.perf_counter() - start, 5)
+    
     return result
 
 chosen_list = gen_list1()
@@ -105,6 +115,7 @@ print("Random numbers:")
 print("Bubble sort:", bubble_sort(), "s")
 print("Selection sort:", selection_sort(), "s")
 print("Insertion sort:", insertion_sort(), "s")
+print("Python sort:", python_sort(), "s")
 print("")
 
 
@@ -113,6 +124,7 @@ print("Few unique numbers:")
 print("Bubble sort:", bubble_sort(), "s")
 print("Selection sort:", selection_sort(), "s")
 print("Insertion sort:", insertion_sort(), "s")
+print("Python sort:", python_sort(), "s")
 print("")
 
 
@@ -121,6 +133,7 @@ print("Mostly organized list:")
 print("Bubble sort:", bubble_sort(), "s")
 print("Selection sort:", selection_sort(), "s")
 print("Insertion sort:", insertion_sort(), "s")
+print("Python sort:", python_sort(), "s")
 print("")
 
 
@@ -129,4 +142,5 @@ print("Backwards sorted list:")
 print("Bubble sort:", bubble_sort(), "s")
 print("Selection sort:", selection_sort(), "s")
 print("Insertion sort:", insertion_sort(), "s")
+print("Python sort:", python_sort(), "s")
 print("")
