@@ -2,7 +2,9 @@ const cache_name = "sr-radio-cache-v1";
 const files_to_cache = [
     "/",
     "/index.html",
-    "/app.js"
+    "/app.js",
+    "/PWA-icon.png",
+    "/PWA-icon192x192.png"
 ];
 
 self.addEventListener("install", event => {
