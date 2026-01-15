@@ -1,13 +1,14 @@
 {
   "name": "Sveriges Radio PWA",
   "short_name": "SR Radio",
-  "start_url": "https://huy-tran06.github.io/PWA/",
+  "start_url": "/PWA/",
+  "scope": "/PWA/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1a1a1a",
   "icons": [
     {
-      "src": "/PWA/PWA-icon192x192",
+      "src": "/PWA/PWA-icon192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
