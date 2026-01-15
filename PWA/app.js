@@ -28,7 +28,7 @@ fetchChannels();
 
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker
-        .register("service-worker.js")
+        .register("/PWA/service-worker.js")
         .then(() => console.log("Service worker registered"))
         .catch(err => console.error("Service Worker error", err));
 }
