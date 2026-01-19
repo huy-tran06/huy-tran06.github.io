@@ -19,28 +19,42 @@ def unsorted_list(lst):
 # Algorithms 
 def linear_search(lst, wanted):
     marked_positions = []
-    not_found = "Value not found"
-    found = "Value found at this position/these positions:"
+    not_caught = "Value not found"
+    caught = "Value found at this position/these positions:"
 
     for i in range(len(lst) - 1):
         if(lst[i] == wanted):
             marked_positions.append(i)
 
     if not marked_positions:
-        return not_found
+        return not_caught
 
-    return f"{found} {marked_positions}"
+    return f"{caught} {marked_positions}"
 
 def binary_search(lst, wanted):
-    marked_positions = []
-    
-    pass
+    not_caught = "Value not found"
+    caught = "Value found at this position:"
 
+    left = 0
+    right = len(lst) - 1
 
+    while left <= right:
+        mid = (left + right) // 2
+
+        if lst[mid] == wanted:
+            return f"{caught} {mid}"
+        elif wanted < lst[mid]:
+            right = mid - 1
+        else:
+            left = mid + 1
+        pass
+
+    return not_caught
 
 print()
 
 # print(sorted_list(my_list))
-print(linear_search(unsorted_list(my_list), 14))
+# print(linear_search(unsorted_list(my_list), 14))
+print(binary_search(sorted_list(my_list), 0))
 
 print()
