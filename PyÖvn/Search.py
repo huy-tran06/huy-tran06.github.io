@@ -32,8 +32,8 @@ def linear_search(lst, wanted):
     return f"{caught} {marked_positions}"
 
 def binary_search(lst, wanted):
-    not_caught = "Value not found"
-    caught = "Value found at this position:"
+    escaped = "Value not found"
+    caught_alive = "Value found at this position:"
 
     left = 0
     right = len(lst) - 1
@@ -42,14 +42,14 @@ def binary_search(lst, wanted):
         mid = (left + right) // 2
 
         if lst[mid] == wanted:
-            return f"{caught} {mid}"
+            return f"{caught_alive} {mid}"
         elif wanted < lst[mid]:
             right = mid - 1
         else:
             left = mid + 1
         pass
 
-    return not_caught
+    return escaped
 
 print()
 
