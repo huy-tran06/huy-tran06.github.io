@@ -1,39 +1,42 @@
 import random
+import time
 
 my_list = []
 
 # Lists
+def unsorted_list(lst):
+    for i in range(20000):
+        lst.append(random.randint(1, 20000))
+
+    return lst
+
 def sorted_list(lst):
     for i in range(10):
         lst.append(i)
 
     return lst
 
-def unsorted_list(lst):
-    for i in range(100000):
-        lst.append(random.randint(1, 100000))
-
-    return lst
-
-
 # Algorithms 
 def linear_search(lst, wanted):
     marked_positions = []
-    not_caught = "Value not found"
-    caught = "Value found at this position/these positions:"
+    not_caught = "Not caught"
+    caught = "Caught at:"
 
+    start = time.perf_counter()
     for i in range(len(lst) - 1):
         if(lst[i] == wanted):
             marked_positions.append(i)
 
     if not marked_positions:
-        return not_caught
+        result = round(time.perf_counter() - start, 5)
+        return f"{result}s {not_caught}"
 
-    return f"{caught} {marked_positions}"
+    result = round(time.perf_counter() - start, 5)
+    return f"{result}s {caught} {marked_positions}"
 
 def binary_search(lst, wanted):
-    escaped = "Value not found"
-    caught_alive = "Value found at this position:"
+    not_caught = "Not caught"
+    caught = "Caught at:"
 
     left = 0
     right = len(lst) - 1
@@ -42,19 +45,19 @@ def binary_search(lst, wanted):
         mid = (left + right) // 2
 
         if lst[mid] == wanted:
-            return f"{caught_alive} {mid}"
+            return f"{caught} {mid}"
         elif wanted < lst[mid]:
             right = mid - 1
         else:
             left = mid + 1
         pass
 
-    return escaped
+    return not_caught
 
 print()
 
 # print(sorted_list(my_list))
-# print(linear_search(unsorted_list(my_list), 14))
-print(binary_search(sorted_list(my_list), 0))
+print(linear_search(unsorted_list(my_list), 14))
+# print(binary_search(sorted_list(my_list), 0))
 
 print()
