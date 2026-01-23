@@ -1,11 +1,20 @@
-<script>
+<script setup>
     import { ref } from "vue"
+    import { supabase } from "../lib/supabase"
 
 
     const email = ref("")
 
-    function login(){
-        console.log("Test login:", email.value)
+    async function login(){
+        const result = await supabase.auth.signInWithOtp({email: email.value})
+        const error = result.error
+
+        if (error){
+            alert(error.message)
+        }
+        else{
+            alert("Check your email")
+        }
     }
 </script>
 
