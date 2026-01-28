@@ -9,6 +9,10 @@ export const useAuthStore = defineStore("auth", {
         async init() {
             const getUser = await supabase.auth.getUser()
             this.user = getUser.data.user
+
+            supabase.auth.onAuthStateChange((_event, session) => {
+                this.user = session?.user ?? null
+            })
         }
     }
 })

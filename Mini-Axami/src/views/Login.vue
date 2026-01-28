@@ -23,7 +23,7 @@
     <div>
         <h1>Login</h1>
         <input v-model="email" placeholder="Email"/>
-        <button @click="login">Test send</button>
+        <button @click="login">Send magic link</button>
     </div>
     
 </template>
