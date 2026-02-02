@@ -22,7 +22,7 @@ def linear_search(lst, wanted):
 ```
 
 ### Analys
-Körtiden är ungefär relativt till antalet element som finns i listan. Om listan blir dubbel så stor så tar det också ungefär dubbel så lång tid att söka igenom. Detta innebär att ju färre element det finns i listan desto snabbare algoritmen kommer att avslutas och vice versa. Därför är linjär sökning ett rimligt val när man har små listor att söka genom eller när man bara vill skriva en enkel sökningsalgoritm som fungerar.
+Körtiden är proportionell till antalet element som finns i listan. Om listan blir dubbel så stor så tar det också ungefär dubbel så lång tid att söka igenom. Detta innebär att ju färre element det finns i listan desto snabbare algoritmen kommer att avslutas och vice versa. Därför är linjär sökning ett rimligt val när man har små listor att söka genom eller när man bara vill skriva en enkel sökningsalgoritm som fungerar.
 
 
 
@@ -54,4 +54,18 @@ def binary_search(lst, wanted):
 ```
 
 ### Analys
-Binär sökning halverar listan varje gång den jämför `mid` med `wanted`. Vilket betyder att algoritmen inte behöver kolla varje element utan bara snabbt kan eliminera hälften av listan vid varje steg. Det behövs bara 20 steg för en lista med 1 000 000 element eftersom man bara kan dela 1 000 000 i häften 20 gånger men om man hade använt linjär sökning istället så hade det behövt, i värsta fall, hela 1 000 000 steg. 
+Binär sökning halverar listan varje gång den jämför `mid` med `wanted`. Vilket betyder att algoritmen inte behöver kolla varje element utan bara snabbt kan eliminera hälften av listan vid varje steg. Det behövs bara 20 steg för en lista med 1 000 000 element eftersom man bara kan dela 1 000 000 i häften 20 gånger men om man hade använt linjär sökning istället så hade det behövt, i värsta fall, alla 1 000 000 stegen som motsvara alla element. Däremot finns det också situationer där binär sökning inte är lämplig som till exempel i osorterade listor där binär sökning inte fungerar alls.
+
+
+
+## Del 3: Jämförelse och tidskomplexitet
+
+### Tidskomplexitet
+Tidskomplexitet beskriver hur snabbt en algoritm växer i arbetsmängd när datan blir större.
+
+### Big-O-notation
+Big-O-notation är ett sätt att beskriva algoritmers tidskomplexitet. Det visar hur algoritmens körtid växer när inputen (n) blir större och vilka beteende algoritmen har i värsta fall.
+
+Linjär sökning har till exempel O(n) vilket är linjär tid och innebär att tiden ökar proportionellt med antalet element.
+
+Binär sökning har däremot O(log n) som är logaritmisk tid och innebär att algoritmen halverar problemet varje steg. 
