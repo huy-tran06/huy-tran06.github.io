@@ -4,12 +4,13 @@ import { supabase } from "../lib/supabase"
 export const useAuthStore = defineStore("auth", {
     state: () => ({
         user : null,
-        role: null
+        role: null,
+        loading: true
     }),
     actions: {
         async init() {
             const getUser = await supabase.auth.getUser()
-            this.user = getUser.data.user
+            this.user = getUser.data.user ?? null
 
             if(this.user){
                 const result = await supabase
@@ -45,6 +46,8 @@ export const useAuthStore = defineStore("auth", {
                     this.role = null
                 }
             })
+
+            this.loading = false
         }
     }
 })
