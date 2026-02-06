@@ -35,7 +35,7 @@ async function verifyOtp() {
     }
     else{
         alert("Logged in!")
-        router.push("/dashboard")
+        router.push("/")
     }
 }
 </script>

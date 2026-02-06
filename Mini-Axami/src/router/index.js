@@ -15,29 +15,20 @@ const router = createRouter({
     routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to) => {
     const authStore = useAuthStore()
 
-    if (authStore.loading){
-        const stop = authStore.$subscribe(() => {
-            if (!authStore.loading) {
-                stop()
-                handleGuard()
-            }
-        })
-    } else{
-        handleGuard()
+    if (authStore.loading) {
+        await authStore.init()
     }
 
-    function handleGuard() {
-        if (to.meta.requiresAuth && !authStore.user) {
-            next("/")
-        }
-        else {
-            next()
-        }
+    if(to.meta.requiresAuth && !authStore.user){
+        return "/"
     }
 
-})
+    if(to.path === "/" && authStore.user) {
+        return "/dashboard"
+    }
+});
 
 export default router

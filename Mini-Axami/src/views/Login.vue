@@ -6,12 +6,7 @@
     const email = ref("")
 
     async function login(){
-        const result = await supabase.auth.signInWithOtp({
-            email: email.value,
-            options: {
-                emailRedirectTo: window.location.origin + "/dashboard"
-            }
-        })
+        const result = await supabase.auth.signInWithOtp({email: email.value})
         const error = result.error
 
         if (error){

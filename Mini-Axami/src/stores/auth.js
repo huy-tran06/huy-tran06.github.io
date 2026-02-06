@@ -1,5 +1,6 @@
 import { defineStore } from "pinia"
 import { supabase } from "../lib/supabase"
+import { watch } from "vue"
 
 export const useAuthStore = defineStore("auth", {
     state: () => ({
@@ -12,7 +13,12 @@ export const useAuthStore = defineStore("auth", {
             const getUser = await supabase.auth.getUser()
             this.user = getUser.data.user ?? null
 
-            if(this.user){
+            watch(() => this.user, async (user) => {
+                if(!user){
+                    this.role = null
+                    return
+                }
+
                 const result = await supabase
                     .from("users")
                     .select("role")
@@ -22,29 +28,18 @@ export const useAuthStore = defineStore("auth", {
                 const roleData = result.data
                 const error = result.error
 
-                if(!error){
+                if(!error && roleData){
                     this.role = roleData.role
                 }
-            }
+                else{
+                    this.role = null
+                }
+            },
+            { immediate: true }
+        )
 
             supabase.auth.onAuthStateChange(async (_event, session) => {
                 this.user = session?.user ?? null
-
-                const result = await supabase
-                    .from("users")
-                    .select("role")
-                    .eq("id", this.user.id)
-                    .single()
-
-                const roleData = result.data
-                const error = result.error
-
-                if(!error){
-                    this.role = roleData.role
-                }
-                else {
-                    this.role = null
-                }
             })
 
             this.loading = false
