@@ -69,3 +69,26 @@ Big-O-notation är ett sätt att beskriva algoritmers tidskomplexitet. Det visar
 Linjär sökning har till exempel O(n) vilket är linjär tid och innebär att tiden ökar proportionellt med antalet element.
 
 Binär sökning har däremot O(log n) som är logaritmisk tid och innebär att algoritmen halverar problemet varje steg. 
+
+### Resonemangsfrågor
+#### Varför spelar algoritmval större roll än programmeringsspråk vid stora datamängder? 
+Det är för att det oftast är algoritmens effektivitet som avgör hur snabbt ett program körs, inte vilket språk man använder. Om man tar till exempel en lista med 1 000 000 element då behöver en linjär sökning upp till 1 000 000 steg medan en binär sökning bara behöver upp till 20 steg. Det finns ingen optimering i språket som kan kompensera för en så stor skillnad. 
+
+#### Hur påverkar datamängdens storlek valet av algoritm?
+Ju större datamängden är desto viktigare det blir att välja en algorim med låg tidskomplexitet. För små problem kan enkla algoritmer fungera bra medan för större problem måste man välja algoritmer som skalar bättre. 
+
+
+
+## Del 4: Hash tables (teori och analys)
+
+### Frågor
+#### 1. Vad är en hash table?
+En hash table är en datastruktur som lagrar data och använder en hashfunktion för att räkna ut var i en intern array ett värde ska lagras vilket gör att det blir mycket snabbt när man ska söka, sätta in och ta bort element.
+
+#### 2. Vad är en hashfunktion och vilket problem löser den? 
+En hashfunktion tar en nyckel, som till exempel ett namn eller ett ID, och omvandlar den till ett heltal som motsvarar ett index i arrayen. Vilket gör det möjligt att snabbt hitta rätt plats i minnet utan att behöva söka igenom alla element.
+
+#### 3. Vad innebär begreppet kollision?
+Det är när två olika nycklar får samma hashvärde vilket gör att de då hamnar på samma plats i hash table.
+
+#### 4. Beskriv minst två olika strategier för att hantera kollisioner.
