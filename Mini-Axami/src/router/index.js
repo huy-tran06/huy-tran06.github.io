@@ -26,7 +26,7 @@ router.beforeEach(async (to) => {
         return "/"
     }
 
-    if(to.path === "/" && authStore.user) {
+    if(to.path === "/" || to.path === "/login-otp" && authStore.user) {
         return "/dashboard"
     }
 });

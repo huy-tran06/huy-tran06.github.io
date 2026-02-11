@@ -43,6 +43,12 @@ export const useAuthStore = defineStore("auth", {
             })
 
             this.loading = false
+        },
+
+        async logout() {
+            await supabase.auth.signOut()
+            this.user = null
+            this.role = null
         }
     }
 })
