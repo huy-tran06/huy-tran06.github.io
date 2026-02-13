@@ -92,3 +92,6 @@ En hashfunktion tar en nyckel, som till exempel ett namn eller ett ID, och omvan
 Det är när två olika nycklar får samma hashvärde vilket gör att de då hamnar på samma plats i hash table.
 
 #### 4. Beskriv minst två olika strategier för att hantera kollisioner.
+Separate chaining är ett sätt att hanterna kollisioner som innebär att varje plats i hash table innehåller en lista som används för att lagra alla värden som krockar.
+
+Open addressing lagrar däremot alla element direkt i hash-tabellens array till skillnad från separata listor som i separate chaining. Om en plats är upptagen letar man efter nästa lediga plats enligt ett mönster. Som till exempel Linear probing, Quadratic probing eller Double hashing.
