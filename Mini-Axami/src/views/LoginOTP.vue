@@ -28,14 +28,9 @@ async function verifyOtp() {
         type: "email"
     })
     const error = data.error
-    console.log({ data, error })
     
-    if(error){
-        alert(error.message)
-    }
-    else{
-        alert("Logged in!")
-        router.push("/")
+    if(!error){
+        router.replace("/dashboard")
     }
 }
 </script>

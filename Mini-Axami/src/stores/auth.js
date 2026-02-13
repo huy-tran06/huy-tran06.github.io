@@ -1,54 +1,53 @@
 import { defineStore } from "pinia"
 import { supabase } from "../lib/supabase"
-import { watch } from "vue"
 
 export const useAuthStore = defineStore("auth", {
     state: () => ({
-        user : null,
+        user: null,
         role: null,
         loading: true
     }),
     actions: {
         async init() {
+            this.loading = true
             const getUser = await supabase.auth.getUser()
             this.user = getUser.data.user ?? null
 
-            watch(() => this.user, async (user) => {
-                if(!user){
-                    this.role = null
-                    return
-                }
-
-                const result = await supabase
-                    .from("users")
-                    .select("role")
-                    .eq("id", this.user.id)
-                    .single()
-
-                const roleData = result.data
-                const error = result.error
-
-                if(!error && roleData){
-                    this.role = roleData.role
-                }
-                else{
-                    this.role = null
-                }
-            },
-            { immediate: true }
-        )
+            await this.fetchRoles()
 
             supabase.auth.onAuthStateChange(async (_event, session) => {
                 this.user = session?.user ?? null
+                await this.fetchRoles()
             })
 
             this.loading = false
         },
 
+        async fetchRoles() {
+            if(!this.user) {
+                this.role = null
+                return
+            }
+
+            const result = await supabase
+                .from("users")
+                .select("role")
+                .eq("id", this.user.id)
+                .single()
+
+            const data = result.data
+            const error = result.error
+
+            if(!error && data) {
+                this.role = data.role
+            }
+            else {
+                this.role = null
+            }
+        },
+
         async logout() {
             await supabase.auth.signOut()
-            this.user = null
-            this.role = null
         }
     }
 })
