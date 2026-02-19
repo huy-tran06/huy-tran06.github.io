@@ -1,22 +1,37 @@
 <script setup>
 import { supabase } from "../lib/supabase";
+import { ref } from "vue";
 
-async function testCreateUnit() {
-    const { data: userData } = await supabase.auth.getUser()
-    const user = userData.user
+const name = ref("")
+const description = ref("")
+const loading = ref(false)
+const errorMessage = ref("")
+const successMessage = ref("")
 
-    const { data, error } = await supabase
+async function createUnit() {
+    loading.value = true
+    errorMessage.value = ""
+    successMessage.value = ""
+
+    const result = await supabase
     .from("units")
     .insert({
-      name: "Test Unit",
-      description: "Temporary test",
-      owner_id: user.id
+      name: name.value ,
+      description: description.value
     })
 
-    console.log("DATA:", data)
-    console.log("ERROR:", error)
-}
+    const error = result.error
+    if(error){
+        errorMessage.value = error.message
+    }
+    else{
+        successMessage.value = "Unit created successfully!"
+        name.value = ""
+        description.value = ""
+    }
 
+    loading.value = false
+}
 </script>
 
 <template>
@@ -24,7 +39,27 @@ async function testCreateUnit() {
         <h1>Customer Dashboard</h1>
     </div>
 
-    <button @click="testCreateUnit">
-        Create test unit
-    </button>
+    <form @submit.prevent="createUnit">
+        <div>
+            <label>Unit Name</label>
+            <input v-model="name" required/>
+        </div>
+
+        <div>
+            <label>Description</label>
+            <textarea v-model="description"></textarea>
+        </div>
+
+        <button type="submit" :disabled="loading">
+            {{ loading ? "Creating..." : "Create Unit"}}
+        </button>
+    </form>
+
+    <p v-if="errorMessage" style="color:red">
+        {{ errorMessage }}
+    </p>
+
+    <p v-if="successMessage" style="color:green">
+        {{ successMessage }}
+    </p>
 </template>
