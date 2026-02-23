@@ -95,3 +95,16 @@ Det är när två olika nycklar får samma hashvärde vilket gör att de då ham
 Separate chaining är ett sätt att hanterna kollisioner som innebär att varje plats i hash table innehåller en lista som används för att lagra alla värden som krockar.
 
 Open addressing lagrar däremot alla element direkt i hash-tabellens array till skillnad från separata listor som i separate chaining. Om en plats är upptagen letar man efter nästa lediga plats enligt ett mönster. Som till exempel Linear probing, Quadratic probing eller Double hashing.
+
+#### 5. Vad menas med genomsnittlig respektive värsta fall-tidskomplexitet?
+Genomsnittlig tidskomplexitet är hur lång tid en operation tar i snitt. Medan värsta fall-tidskomplexitet är hur lång tid operationen kan ta i det sämsta tänkbara scenariot.
+
+#### 6. Varför sägs det att uppslag i en hash table oftast är O(1)?
+För att hashfunktionen direkt räknar ut exakt var ett element finns. Man går direkt till rätt plats och ingen sökning behövs.
+
+
+### Analys
+#### Sökning i en osorterad lista
+När man söker genom en osorterad lista måste man kolla genom alla element tills det sökta värdet hittas eller listan tar slut. Detta innebär att tidskomplexiteten i både genomsnittligt och värsta fall är O(n) eftersom man i värsta fall måste gå igenom alla element. Fördelen med en osorterad lista är att den är mycket minneseffetiv och enkel att implementera eftersom den inte kräver någon extra datastruktur utöver själva listan. Metoden är lämplig när datamängden är liten eller när listan ofta förändras genom insättningar och borttagningar.
+
+#### Sökning i en sorterad lista
