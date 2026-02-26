@@ -1,5 +1,6 @@
 import { defineStore } from "pinia"
 import { supabase } from "../lib/supabase"
+import { useAuthStore } from "./auth"
 
 console.log("KEY:", import.meta.env.VITE_SUPABASE_ANON_KEY)
 console.log("Supabase instance:", supabase)
@@ -11,6 +12,7 @@ export const useTaskStore = defineStore("tasks", {
 
     actions: {
         async fetchTasks(unitId) {
+
             this.loading = true
 
             const { data, error } = await supabase
@@ -28,9 +30,15 @@ export const useTaskStore = defineStore("tasks", {
         },
 
         async createTask(payload){
+            const auth = useAuthStore()
+            
             const { data, error } = await supabase
                 .from("tasks")
-                .insert(payload)
+                .insert({
+                    ...payload,
+                    created_by: auth.user.id,
+                    status: "created"
+                })
                 .select()
 
             if(!error && data){
