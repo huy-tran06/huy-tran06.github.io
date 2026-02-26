@@ -1,4 +1,6 @@
 <script setup>
+import CreateTaskForm from './CreateTaskForm.vue';
+
 defineProps({
     units: Array
 })
@@ -9,6 +11,7 @@ defineProps({
         <ul v-if="units.length">
             <li v-for="unit in units" :key="unit.id">
                 {{ unit.name }}
+                <CreateTaskForm :unitId="unit.id"/>
             </li>
         </ul>
 
