@@ -1,6 +1,5 @@
 import { defineStore } from "pinia"
 import { supabase } from "../lib/supabase"
-console.log("Supabase instance:", supabase)
 
 export const useUnitStore = defineStore("units", {
     state: () => ({

@@ -2,8 +2,6 @@ import { defineStore } from "pinia"
 import { supabase } from "../lib/supabase"
 import { useAuthStore } from "./auth"
 
-console.log("KEY:", import.meta.env.VITE_SUPABASE_ANON_KEY)
-console.log("Supabase instance:", supabase)
 export const useTaskStore = defineStore("tasks", {
     state: () => ({
         tasks: [],

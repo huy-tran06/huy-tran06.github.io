@@ -108,3 +108,4 @@ För att hashfunktionen direkt räknar ut exakt var ett element finns. Man går 
 När man söker genom en osorterad lista måste man kolla genom alla element tills det sökta värdet hittas eller listan tar slut. Detta innebär att tidskomplexiteten i både genomsnittligt och värsta fall är O(n) eftersom man i värsta fall måste gå igenom alla element. Fördelen med en osorterad lista är att den är mycket minneseffetiv och enkel att implementera eftersom den inte kräver någon extra datastruktur utöver själva listan. Metoden är lämplig när datamängden är liten eller när listan ofta förändras genom insättningar och borttagningar.
 
 #### Sökning i en sorterad lista
+Vid sökning i en sorterad lista kan man istället använda binärsökning vilket innebär att man 

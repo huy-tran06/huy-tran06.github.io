@@ -1,6 +1,7 @@
 <script setup>
-import { ref } from "vue"
+import { ref, onMounted } from "vue"
 import { useTaskStore } from "../stores/taskStore"
+import { useUserStore } from "../stores/userStore"
 
 const props = defineProps({
     unitId: {
@@ -10,11 +11,17 @@ const props = defineProps({
 })
 
 const taskStore = useTaskStore()
+const userStore = useUserStore()
+
+onMounted(() => {
+    userStore.fetchWorkers()
+})
 
 const title = ref("")
 const description = ref("")
 const price = ref(null)
 const priority = ref("medium")
+const assignedWorkerId = ref(null)
 
 const loading = ref(false)
 const errorMessage = ref("")
@@ -42,7 +49,8 @@ async function createTask() {
         title: title.value,
         description: description.value || null,
         price: price.value || null,
-        priority: priority.value
+        priority: priority.value,
+        assigned_worker_id: assignedWorkerId.value || null
     })
     if(error){
         errorMessage.value = error.message
@@ -53,6 +61,7 @@ async function createTask() {
         description.value = ""
         price.value = null
         priority.value = "medium"
+        assignedWorkerId.value = null
 
         formRef.value.resetValidation()
     }
@@ -92,6 +101,15 @@ async function createTask() {
                     v-model="priority"
                     :items="['low', 'medium', 'high']"
                     label="Priority"
+                />
+
+                <v-select
+                    v-model="assignedWorkerId"
+                    :items="userStore.workers"
+                    item-title="full_name"
+                    item-value="id"
+                    label="Assign Worker (optional)"
+                    clearable
                 />
 
                 <v-btn
