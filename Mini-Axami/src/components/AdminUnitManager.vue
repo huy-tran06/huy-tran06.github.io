@@ -11,8 +11,12 @@ onMounted(() => {
 </script>
 
 <template>
-    <div>
-        <h2>All Units</h2>
-        <UnitsList :units="unitStore.units"/>
-    </div>
+    <v-container>
+        <v-card elevation="2">
+            <v-card-title>All Units</v-card-title>
+            <v-card-text>
+                <UnitsList :units="unitStore.units"/>
+            </v-card-text>
+        </v-card>
+    </v-container>
 </template>

@@ -1,8 +1,7 @@
 <script setup>
 import { onMounted } from "vue"
-import { useUnitStore } from "../stores/unitStore";
-import CreateUnitForm from "./CreateUnitForm.vue";
-import UnitsList from "./UnitsList.vue";
+import { useUnitStore } from "../stores/unitStore"
+import UnitsList from "./UnitsList.vue"
 
 const unitStore = useUnitStore()
 
@@ -13,12 +12,10 @@ onMounted(() => {
 
 <template>
     <v-container>
-        <CreateUnitForm/>
-
         <v-card elevation="2">
-            <v-card-title>Your Units</v-card-title>
+            <v-card-title>Your Related Units</v-card-title>
             <v-card-text>
-                <UnitsList :units="unitStore.units"/>
+                <UnitsList :units="unitStore.units" />
             </v-card-text>
         </v-card>
     </v-container>

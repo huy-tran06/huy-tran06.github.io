@@ -1,30 +1,16 @@
 <script setup>
-import { supabase } from "../lib/supabase";
-
-async function testCreateUnit() {
-    const { data: userData } = await supabase.auth.getUser()
-    const user = userData.user
-
-    const { data, error } = await supabase
-    .from("units")
-    .insert({
-      name: "Test Unit",
-      description: "Temporary test",
-      owner_id: user.id
-    })
-
-    console.log("DATA:", data)
-    console.log("ERROR:", error)
-}
-
+import WorkerUnitManager from "../components/WorkerUnitManager.vue"
 </script>
 
 <template>
-    <div>
-        <h1>Worker Dashboard</h1>
-    </div>
+    <v-container>
+        <v-card class="mb-4" elevation="2">
+            <v-card-title>Worker Dashboard</v-card-title>
+            <v-card-text>
+                You can view your assigned/suggested tasks and suggest new tasks in related units.
+            </v-card-text>
+        </v-card>
+    </v-container>
 
-    <button @click="testCreateUnit">
-        Create test unit
-    </button>    
+    <WorkerUnitManager />
 </template>

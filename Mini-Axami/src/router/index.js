@@ -1,12 +1,13 @@
 import { createRouter, createWebHistory } from "vue-router"
 import Login from "../views/Login.vue"
-import LoginOTP from "../views/LoginOTP.vue"
+import Signup from "../views/Signup.vue"
 import Dashboard from "../views/Dashboard.vue"
 import { useAuthStore } from "../stores/auth"
 
 const routes = [
-    { path: "/", component: Login },
-    { path: "/login-otp", component: LoginOTP},
+    { path: "/", redirect: "/login" },
+    { path: "/login", component: Login },
+    { path: "/signup", component: Signup },
     { path: "/dashboard", component: Dashboard, meta: { requiresAuth: true} }
 ]
 
@@ -23,10 +24,10 @@ router.beforeEach(async (to) => {
     }
 
     if(to.meta.requiresAuth && !authStore.user){
-        return "/"
+        return "/login"
     }
 
-    if((to.path === "/" || to.path === "/login-otp") && authStore.user) {
+    if((to.path === "/" || to.path === "/login" || to.path === "/signup") && authStore.user) {
         return "/dashboard"
     }
 });

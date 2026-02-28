@@ -3,9 +3,11 @@ import AdminUnitManager from '../components/AdminUnitManager.vue';
 </script>
 
 <template>
-    <div>
-        <h1>Admin Dashboard</h1>
+    <v-container>
+        <v-card class="mb-4" elevation="2">
+            <v-card-title>Admin Dashboard</v-card-title>
+        </v-card>
 
         <AdminUnitManager/>
-    </div>
+    </v-container>
 </template>

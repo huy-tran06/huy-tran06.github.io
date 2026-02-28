@@ -24,12 +24,20 @@ const roleComponent = computed(() => {
 
 const handleLogout = async () => {
     await authStore.logout()
-    router.push("/")
+    router.push("/login")
 }
 </script>
 
 <template>
     <component :is="roleComponent"/>
-    <button @click="handleLogout">Logout</button>
+    <v-container>
+        <v-btn
+            @click="handleLogout"
+            color="secondary"
+            variant="outlined"
+        >
+            Logout
+        </v-btn>
+    </v-container>
 </template>
 

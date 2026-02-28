@@ -1,7 +1,8 @@
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed } from "vue"
 import { useTaskStore } from "../stores/taskStore"
 import { useUserStore } from "../stores/userStore"
+import { useAuthStore } from "../stores/auth"
 
 const props = defineProps({
     unitId: {
@@ -12,9 +13,16 @@ const props = defineProps({
 
 const taskStore = useTaskStore()
 const userStore = useUserStore()
+const authStore = useAuthStore()
+
+const isWorker = computed(() => authStore.role === "worker")
+const formTitle = computed(() => isWorker.value ? "Suggest New Task" : "Create New Task")
+const submitText = computed(() => isWorker.value ? "Send Suggestion" : "Create Task")
 
 onMounted(() => {
-    userStore.fetchWorkers()
+    if (!isWorker.value) {
+        userStore.fetchWorkers()
+    }
 })
 
 const title = ref("")
@@ -50,12 +58,14 @@ async function createTask() {
         description: description.value || null,
         price: price.value || null,
         priority: priority.value,
-        assigned_worker_id: assignedWorkerId.value || null
+        assigned_worker_id: isWorker.value ? null : (assignedWorkerId.value || null)
     })
     if(error){
         errorMessage.value = error.message
     } else {
-        successMessage.value = "Task created successfully!"
+        successMessage.value = isWorker.value
+            ? "Task suggestion submitted!"
+            : "Task created successfully!"
 
         title.value = ""
         description.value = ""
@@ -72,7 +82,7 @@ async function createTask() {
 
 <template>
     <v-card class="pa-4 mb-4" elevation="3">
-        <v-card-title>Create New Task</v-card-title>
+        <v-card-title>{{ formTitle }}</v-card-title>
 
         <v-card-text>
             <v-form ref="formRef" @submit.prevent="createTask">
@@ -104,6 +114,7 @@ async function createTask() {
                 />
 
                 <v-select
+                    v-if="!isWorker"
                     v-model="assignedWorkerId"
                     :items="userStore.workers"
                     item-title="full_name"
@@ -119,7 +130,7 @@ async function createTask() {
                     block
                     class="mt-3"
                 >
-                    Create Task
+                    {{ submitText }}
                 </v-btn>
             </v-form>
 

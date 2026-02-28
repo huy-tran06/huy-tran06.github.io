@@ -34,27 +34,51 @@ async function createUnit() {
 </script>
 
 <template>
-    <form @submit.prevent="createUnit">
-        <div>
-            <label>Unit Name</label>
-            <input v-model="name" required/>
-        </div>
+    <v-card class="pa-4 mb-4" elevation="3">
+        <v-card-title>Create Unit</v-card-title>
 
-        <div>
-            <label>Description</label>
-            <textarea v-model="description"></textarea>
-        </div>
+        <v-card-text>
+            <v-form @submit.prevent="createUnit">
+                <v-text-field
+                    v-model="name"
+                    label="Unit Name"
+                    required
+                />
 
-        <button type="submit" :disabled="loading">
-            {{ loading ? "Creating..." : "Create Unit"}}
-        </button>
-    </form>
+                <v-textarea
+                    v-model="description"
+                    label="Description"
+                    rows="3"
+                    auto-grow
+                />
 
-    <p v-if="errorMessage" style="color:red">
-        {{ errorMessage }}
-    </p>
+                <v-btn
+                    type="submit"
+                    :loading="loading"
+                    color="primary"
+                    block
+                >
+                    Create Unit
+                </v-btn>
+            </v-form>
 
-    <p v-if="successMessage" style="color:green">
-        {{ successMessage }}
-    </p>
+            <v-alert
+                v-if="errorMessage"
+                type="error"
+                variant="tonal"
+                class="mt-3"
+            >
+                {{ errorMessage }}
+            </v-alert>
+
+            <v-alert
+                v-if="successMessage"
+                type="success"
+                variant="tonal"
+                class="mt-3"
+            >
+                {{ successMessage }}
+            </v-alert>
+        </v-card-text>
+    </v-card>
 </template>
