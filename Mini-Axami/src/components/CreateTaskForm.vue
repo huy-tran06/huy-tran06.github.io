@@ -10,6 +10,7 @@ const props = defineProps({
         required: true
     }
 })
+const emit = defineEmits(["submitted"])
 
 const taskStore = useTaskStore()
 const userStore = useUserStore()
@@ -74,6 +75,7 @@ async function createTask() {
         assignedWorkerId.value = null
 
         formRef.value.resetValidation()
+        emit("submitted")
     }
 
     loading.value = false

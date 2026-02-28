@@ -107,6 +107,38 @@ export const useTaskStore = defineStore("tasks", {
             }
 
             return { data, error }
+        },
+
+        async updateTask(taskId, unitId, updates) {
+            const { data, error } = await supabase
+                .from("tasks")
+                .update(updates)
+                .eq("id", taskId)
+                .eq("unit_id", unitId)
+                .select()
+                .maybeSingle()
+
+            if (!error && data) {
+                const unitTasks = this.tasksByUnit[unitId] || []
+                this.tasksByUnit[unitId] = unitTasks.map((task) =>
+                    task.id === taskId ? data : task
+                )
+
+                this.tasks = this.tasks.map((task) =>
+                    task.id === taskId ? data : task
+                )
+            }
+
+            if (!error && !data) {
+                return {
+                    data: null,
+                    error: {
+                        message: "Task was not updated. You may not have permission for this task."
+                    }
+                }
+            }
+
+            return { data, error }
         }
     }
 })
