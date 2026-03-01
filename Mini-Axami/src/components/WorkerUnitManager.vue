@@ -15,7 +15,7 @@ onMounted(() => {
         <v-card elevation="2">
             <v-card-title>Your Related Units</v-card-title>
             <v-card-text>
-                <UnitsList :units="unitStore.units" />
+                <UnitsList :units="unitStore.units" :collapseTasksByDefault="true" />
             </v-card-text>
         </v-card>
     </v-container>

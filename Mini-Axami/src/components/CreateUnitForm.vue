@@ -3,6 +3,7 @@ import { useUnitStore } from "../stores/unitStore";
 import { ref } from "vue";
 
 const unitStore = useUnitStore()
+const emit = defineEmits(["created"])
 
 const name = ref("")
 const description = ref("")
@@ -25,6 +26,7 @@ async function createUnit() {
     }
     else {
         successMessage.value = "Unit created successfully!"
+        emit("created")
         name.value = ""
         description.value = ""
     }

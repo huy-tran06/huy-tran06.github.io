@@ -8,6 +8,10 @@ const props = defineProps({
     units: {
         type: Array,
         default: () => []
+    },
+    collapseTasksByDefault: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -23,6 +27,7 @@ const canSubmitTask = computed(() =>
 const actionLoadingByTask = ref({})
 const actionErrorByTask = ref({})
 const dialogByUnit = reactive({})
+const tasksVisibleByUnit = reactive({})
 const editDialogByTask = reactive({})
 const editLoadingByTask = reactive({})
 const editErrorByTask = reactive({})
@@ -41,6 +46,14 @@ async function loadTasks() {
 
 function tasksForUnit(unitId) {
     return taskStore.tasksByUnit[unitId] || []
+}
+
+function areTasksVisible(unitId) {
+    return !props.collapseTasksByDefault || !!tasksVisibleByUnit[unitId]
+}
+
+function toggleTasks(unitId) {
+    tasksVisibleByUnit[unitId] = !tasksVisibleByUnit[unitId]
 }
 
 function formatStatusLabel(status) {
@@ -151,151 +164,163 @@ watch(
 
                     <v-card-text>
                         <v-btn
-                            v-if="canSubmitTask"
-                            class="mb-3"
-                            color="primary"
-                            variant="outlined"
                             size="small"
-                            @click="openCreateTaskDialog(unit.id)"
+                            variant="outlined"
+                            color="primary"
+                            class="mb-3"
+                            @click="toggleTasks(unit.id)"
                         >
-                            {{ submitButtonText }}
+                            {{ areTasksVisible(unit.id) ? "Hide Tasks" : "Show Tasks" }}
                         </v-btn>
-
-                        <v-dialog
-                            v-if="canSubmitTask"
-                            v-model="dialogByUnit[unit.id]"
-                            max-width="760"
-                        >
-                            <CreateTaskForm
-                                :unitId="unit.id"
-                                @submitted="closeCreateTaskDialog(unit.id)"
-                            />
-                        </v-dialog>
 
                         <v-divider class="my-4" />
 
-                        <div class="text-subtitle-1 mb-2">Tasks</div>
-
-                        <v-list v-if="tasksForUnit(unit.id).length" density="comfortable">
-                            <v-list-item
-                                v-for="task in tasksForUnit(unit.id)"
-                                :key="task.id"
+                        <template v-if="areTasksVisible(unit.id)">
+                            <v-btn
+                                v-if="canSubmitTask"
+                                class="mb-3"
+                                color="primary"
+                                variant="outlined"
+                                size="small"
+                                @click="openCreateTaskDialog(unit.id)"
                             >
-                                <v-list-item-title>{{ task.title }}</v-list-item-title>
-                                <div class="mt-1">
-                                    <v-list-item-subtitle class="mb-1">
-                                        Status: {{ formatStatusLabel(task.status) }}
-                                    </v-list-item-subtitle>
-                                    <v-list-item-subtitle>
-                                        Comments: {{ task.comments || "None" }}
-                                    </v-list-item-subtitle>
-                                </div>
+                                {{ submitButtonText }}
+                            </v-btn>
 
-                                <template #append>
-                                    <v-btn
-                                        v-if="isCustomer && task.status === 'suggested'"
-                                        @click="approveTask(task.id, unit.id)"
-                                        :loading="actionLoadingByTask[task.id]"
-                                        size="small"
-                                        color="primary"
-                                        variant="tonal"
-                                    >
-                                        Approve suggestion
-                                    </v-btn>
+                            <v-dialog
+                                v-if="canSubmitTask"
+                                v-model="dialogByUnit[unit.id]"
+                                max-width="760"
+                            >
+                                <CreateTaskForm
+                                    :unitId="unit.id"
+                                    @submitted="closeCreateTaskDialog(unit.id)"
+                                />
+                            </v-dialog>
 
-                                    <v-btn
-                                        v-if="canWorkerEditTask(task)"
-                                        @click="openEditDialog(task)"
-                                        size="small"
-                                        color="secondary"
-                                        variant="tonal"
-                                        class="ml-2"
-                                    >
-                                        Edit
-                                    </v-btn>
-                                </template>
-                                <v-dialog
-                                    v-if="canWorkerEditTask(task)"
-                                    v-model="editDialogByTask[task.id]"
-                                    max-width="640"
+                            <div class="text-subtitle-1 mb-2">Tasks</div>
+
+                            <v-list v-if="tasksForUnit(unit.id).length" density="comfortable">
+                                <v-list-item
+                                    v-for="task in tasksForUnit(unit.id)"
+                                    :key="task.id"
                                 >
-                                    <v-card>
-                                        <v-card-title>Edit Task</v-card-title>
-                                        <v-card-text>
-                                            <v-textarea
-                                                v-model="editFormByTask[task.id].comments"
-                                                label="Comments"
-                                                rows="3"
-                                                auto-grow
-                                            />
+                                    <v-list-item-title>{{ task.title }}</v-list-item-title>
+                                    <div class="mt-1">
+                                        <v-list-item-subtitle class="mb-1">
+                                            Status: {{ formatStatusLabel(task.status) }}
+                                        </v-list-item-subtitle>
+                                        <v-list-item-subtitle>
+                                            Comments: {{ task.comments || "None" }}
+                                        </v-list-item-subtitle>
+                                    </div>
 
-                                            <v-select
-                                                v-if="statusOptionsForTask(task).length"
-                                                v-model="editFormByTask[task.id].status"
-                                                :items="statusOptionsForTask(task)"
-                                                item-title="title"
-                                                item-value="value"
-                                                label="New status"
-                                                clearable
-                                            />
+                                    <template #append>
+                                        <v-btn
+                                            v-if="isCustomer && task.status === 'suggested'"
+                                            @click="approveTask(task.id, unit.id)"
+                                            :loading="actionLoadingByTask[task.id]"
+                                            size="small"
+                                            color="primary"
+                                            variant="tonal"
+                                        >
+                                            Approve suggestion
+                                        </v-btn>
 
-                                            <v-alert
-                                                v-if="editSuccessByTask[task.id]"
-                                                type="success"
-                                                variant="tonal"
-                                                class="mt-2"
-                                            >
-                                                {{ editSuccessByTask[task.id] }}
-                                            </v-alert>
+                                        <v-btn
+                                            v-if="canWorkerEditTask(task)"
+                                            @click="openEditDialog(task)"
+                                            size="small"
+                                            color="secondary"
+                                            variant="tonal"
+                                            class="ml-2"
+                                        >
+                                            Edit
+                                        </v-btn>
+                                    </template>
+                                    <v-dialog
+                                        v-if="canWorkerEditTask(task)"
+                                        v-model="editDialogByTask[task.id]"
+                                        max-width="640"
+                                    >
+                                        <v-card>
+                                            <v-card-title>Edit Task</v-card-title>
+                                            <v-card-text>
+                                                <v-textarea
+                                                    v-model="editFormByTask[task.id].comments"
+                                                    label="Comments"
+                                                    rows="3"
+                                                    auto-grow
+                                                />
 
-                                            <v-alert
-                                                v-if="editErrorByTask[task.id]"
-                                                type="error"
-                                                variant="tonal"
-                                                class="mt-2"
-                                            >
-                                                {{ editErrorByTask[task.id] }}
-                                            </v-alert>
-                                        </v-card-text>
-                                        <v-card-actions>
-                                            <v-spacer />
-                                            <v-btn
-                                                variant="text"
-                                                @click="closeEditDialog(task.id)"
-                                            >
-                                                Close
-                                            </v-btn>
-                                            <v-btn
-                                                color="primary"
-                                                :loading="editLoadingByTask[task.id]"
-                                                @click="saveWorkerTaskEdit(task, unit.id)"
-                                            >
-                                                Save
-                                            </v-btn>
-                                        </v-card-actions>
-                                    </v-card>
-                                </v-dialog>
-                            </v-list-item>
-                        </v-list>
+                                                <v-select
+                                                    v-if="statusOptionsForTask(task).length"
+                                                    v-model="editFormByTask[task.id].status"
+                                                    :items="statusOptionsForTask(task)"
+                                                    item-title="title"
+                                                    item-value="value"
+                                                    label="New status"
+                                                    clearable
+                                                />
 
-                        <v-alert
-                            v-else
-                            type="info"
-                            variant="tonal"
-                        >
-                            No tasks yet.
-                        </v-alert>
+                                                <v-alert
+                                                    v-if="editSuccessByTask[task.id]"
+                                                    type="success"
+                                                    variant="tonal"
+                                                    class="mt-2"
+                                                >
+                                                    {{ editSuccessByTask[task.id] }}
+                                                </v-alert>
 
-                        <v-alert
-                            v-for="task in tasksForUnit(unit.id)"
-                            :key="`error-${task.id}`"
-                            v-show="actionErrorByTask[task.id]"
-                            type="error"
-                            variant="tonal"
-                            class="mt-2"
-                        >
-                            {{ actionErrorByTask[task.id] }}
-                        </v-alert>
+                                                <v-alert
+                                                    v-if="editErrorByTask[task.id]"
+                                                    type="error"
+                                                    variant="tonal"
+                                                    class="mt-2"
+                                                >
+                                                    {{ editErrorByTask[task.id] }}
+                                                </v-alert>
+                                            </v-card-text>
+                                            <v-card-actions>
+                                                <v-spacer />
+                                                <v-btn
+                                                    variant="text"
+                                                    @click="closeEditDialog(task.id)"
+                                                >
+                                                    Close
+                                                </v-btn>
+                                                <v-btn
+                                                    color="primary"
+                                                    :loading="editLoadingByTask[task.id]"
+                                                    @click="saveWorkerTaskEdit(task, unit.id)"
+                                                >
+                                                    Save
+                                                </v-btn>
+                                            </v-card-actions>
+                                        </v-card>
+                                    </v-dialog>
+                                </v-list-item>
+                            </v-list>
+
+                            <v-alert
+                                v-else
+                                type="info"
+                                variant="tonal"
+                            >
+                                No tasks yet.
+                            </v-alert>
+
+                            <v-alert
+                                v-for="task in tasksForUnit(unit.id)"
+                                :key="`error-${task.id}`"
+                                v-show="actionErrorByTask[task.id]"
+                                type="error"
+                                variant="tonal"
+                                class="mt-2"
+                            >
+                                {{ actionErrorByTask[task.id] }}
+                            </v-alert>
+                        </template>
                     </v-card-text>
                 </v-card>
             </v-col>
