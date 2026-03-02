@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from "vue"
+import { ref, onMounted, computed, watch } from "vue"
 import { useTaskStore } from "../stores/taskStore"
 import { useUserStore } from "../stores/userStore"
 import { useAuthStore } from "../stores/auth"
@@ -19,12 +19,52 @@ const authStore = useAuthStore()
 const isWorker = computed(() => authStore.role === "worker")
 const formTitle = computed(() => isWorker.value ? "Suggest New Task" : "Create New Task")
 const submitText = computed(() => isWorker.value ? "Send Suggestion" : "Create Task")
+const workerSelectMenuOpen = ref(false)
+const workerNoDataText = computed(() => {
+    if (userStore.workersLoading) {
+        return "Loading workers..."
+    }
+
+    if (userStore.workersError) {
+        return userStore.workersError
+    }
+
+    return "No workers available. Add a user with role 'worker'."
+})
+
+async function loadWorkersIfNeeded(force = false) {
+    if (isWorker.value) {
+        return
+    }
+
+    if (!force && (userStore.workersLoading || userStore.workers.length)) {
+        return
+    }
+
+    await userStore.fetchWorkers()
+}
 
 onMounted(() => {
-    if (!isWorker.value) {
-        userStore.fetchWorkers()
-    }
+    loadWorkersIfNeeded()
 })
+
+watch(
+    () => authStore.role,
+    (role) => {
+        if (role && role !== "worker") {
+            loadWorkersIfNeeded(true)
+        }
+    }
+)
+
+watch(
+    () => workerSelectMenuOpen.value,
+    (isOpen) => {
+        if (isOpen && !userStore.workers.length) {
+            loadWorkersIfNeeded(true)
+        }
+    }
+)
 
 const title = ref("")
 const description = ref("")
@@ -118,10 +158,13 @@ async function createTask() {
                 <v-select
                     v-if="!isWorker"
                     v-model="assignedWorkerId"
+                    v-model:menu="workerSelectMenuOpen"
                     :items="userStore.workers"
                     item-title="full_name"
                     item-value="id"
                     label="Assign Worker (optional)"
+                    :loading="userStore.workersLoading"
+                    :no-data-text="workerNoDataText"
                     clearable
                 />
 
