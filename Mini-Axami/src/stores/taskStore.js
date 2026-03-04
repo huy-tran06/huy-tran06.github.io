@@ -56,6 +56,7 @@ export const useTaskStore = defineStore("tasks", {
             if (isWorker) {
                 insertPayload.status = "suggested"
                 insertPayload.suggested_by = auth.user.id
+                insertPayload.assigned_worker_id = auth.user.id
             } else {
                 insertPayload.status = "created"
             }

@@ -165,8 +165,12 @@ function canWorkerEditTask(task) {
     return isWorker.value && ["suggested", "created", "in_progress"].includes(task.status)
 }
 
-function canCustomerEditTask() {
-    return isCustomer.value
+function canWorkerEditSuggestedTaskDetails(task) {
+    return isWorker.value && task.suggested_by === authStore.user?.id
+}
+
+function canCustomerEditTask(task) {
+    return isCustomer.value && task.status !== "suggested"
 }
 
 function canEditTask(task) {
@@ -245,6 +249,11 @@ async function saveTaskEdit(task, unitId) {
         updates.status = form.status
         updates.comments = form.comments || null
     } else {
+        if (canWorkerEditSuggestedTaskDetails(task)) {
+            updates.title = form.title
+            updates.description = form.description || null
+        }
+
         updates.comments = form.comments || null
 
         if (form.status) {
@@ -445,6 +454,20 @@ watch(
                                                         item-title="title"
                                                         item-value="value"
                                                         label="Status"
+                                                    />
+                                                </template>
+
+                                                <template v-if="canWorkerEditSuggestedTaskDetails(task)">
+                                                    <v-text-field
+                                                        v-model="editFormByTask[task.id].title"
+                                                        label="Title"
+                                                    />
+
+                                                    <v-textarea
+                                                        v-model="editFormByTask[task.id].description"
+                                                        label="Description"
+                                                        rows="3"
+                                                        auto-grow
                                                     />
                                                 </template>
 
