@@ -21,8 +21,9 @@ export const useTaskStore = defineStore("tasks", {
                 .order("created_at", { ascending: false})
             
             if (!error) {
-                this.tasks = data
-                this.tasksByUnit[unitId] = data
+                const unitTasks = Array.isArray(data) ? [...data] : []
+                this.tasks = [...unitTasks]
+                this.tasksByUnit[unitId] = unitTasks
             }
 
             this.loading = false
@@ -67,7 +68,7 @@ export const useTaskStore = defineStore("tasks", {
                 .select()
 
             if(!error && data){
-                this.tasks.unshift(data[0])
+                this.tasks = [data[0], ...this.tasks]
 
                 const unitId = data[0].unit_id
                 const existingTasks = this.tasksByUnit[unitId] || []
