@@ -50,8 +50,6 @@ const workerNoDataText = computed(() => {
         return userStore.workersError
     }
 
-    // skibidi ?
-
     return "No workers available."
 })
 
