@@ -86,39 +86,44 @@ async function createTask() {
     errorMessage.value = ""
     successMessage.value = ""
 
-    const { valid } = await formRef.value.validate()
-    if(!valid){
-        return
+    try {
+        const { valid } = await formRef.value.validate()
+        if (!valid) {
+            return
+        }
+
+        loading.value = true
+
+        const { error } = await taskStore.createTask({
+            unit_id: props.unitId,
+            title: title.value,
+            description: description.value || null,
+            price: price.value || null,
+            priority: priority.value,
+            assigned_worker_id: isWorker.value ? null : (assignedWorkerId.value || null)
+        })
+
+        if (error) {
+            errorMessage.value = error.message
+        } else {
+            successMessage.value = isWorker.value
+                ? "Task suggestion submitted!"
+                : "Task created successfully!"
+
+            title.value = ""
+            description.value = ""
+            price.value = null
+            priority.value = "medium"
+            assignedWorkerId.value = null
+
+            formRef.value.resetValidation()
+            emit("submitted")
+        }
+    } catch (error) {
+        errorMessage.value = error?.message || "Could not create task."
+    } finally {
+        loading.value = false
     }
-
-    loading.value = true
-
-    const { error } = await taskStore.createTask({
-        unit_id: props.unitId,
-        title: title.value,
-        description: description.value || null,
-        price: price.value || null,
-        priority: priority.value,
-        assigned_worker_id: isWorker.value ? null : (assignedWorkerId.value || null)
-    })
-    if(error){
-        errorMessage.value = error.message
-    } else {
-        successMessage.value = isWorker.value
-            ? "Task suggestion submitted!"
-            : "Task created successfully!"
-
-        title.value = ""
-        description.value = ""
-        price.value = null
-        priority.value = "medium"
-        assignedWorkerId.value = null
-
-        formRef.value.resetValidation()
-        emit("submitted")
-    }
-
-    loading.value = false
 }
 </script>
 

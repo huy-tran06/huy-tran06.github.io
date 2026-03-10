@@ -26,25 +26,29 @@ async function sendSignupOtp() {
 
     loading.value = true
 
-    const { error } = await supabase.auth.signInWithOtp({
-        email: email.value,
-        options: {
-            shouldCreateUser: true,
-            data: {
-                full_name: fullName.value.trim()
+    try {
+        const { error } = await supabase.auth.signInWithOtp({
+            email: email.value,
+            options: {
+                shouldCreateUser: true,
+                data: {
+                    full_name: fullName.value.trim()
+                }
             }
+        })
+
+        if (error) {
+            errorMessage.value = error.message
+            return
         }
-    })
 
-    loading.value = false
-
-    if (error) {
-        errorMessage.value = error.message
-        return
+        otpSent.value = true
+        successMessage.value = "OTP sent. Check your email."
+    } catch (error) {
+        errorMessage.value = error?.message || "Could not send OTP."
+    } finally {
+        loading.value = false
     }
-
-    otpSent.value = true
-    successMessage.value = "OTP sent. Check your email."
 }
 
 async function verifySignupOtp() {
@@ -52,44 +56,46 @@ async function verifySignupOtp() {
     successMessage.value = ""
     loading.value = true
 
-    const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
-        email: email.value,
-        token: otp.value,
-        type: "email"
-    })
-
-    if (verifyError) {
-        loading.value = false
-        errorMessage.value = verifyError.message
-        return
-    }
-
-    const userId = verifyData.user?.id
-    if (!userId) {
-        loading.value = false
-        errorMessage.value = "Could not get user after OTP verification."
-        return
-    }
-
-    const { error: profileError } = await supabase
-        .from("users")
-        .upsert({
-            id: userId,
-            full_name: fullName.value.trim(),
-            role: "customer"
+    try {
+        const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+            email: email.value,
+            token: otp.value,
+            type: "email"
         })
 
-    if (profileError) {
+        if (verifyError) {
+            errorMessage.value = verifyError.message
+            return
+        }
+
+        const userId = verifyData.user?.id
+        if (!userId) {
+            errorMessage.value = "Could not get user after OTP verification."
+            return
+        }
+
+        const { error: profileError } = await supabase
+            .from("users")
+            .upsert({
+                id: userId,
+                full_name: fullName.value.trim(),
+                role: "customer"
+            })
+
+        if (profileError) {
+            errorMessage.value = `Signed in, but failed to save profile: ${profileError.message}`
+            return
+        }
+
+        authStore.user = verifyData.user
+        await authStore.fetchRoles()
+
+        router.replace("/dashboard")
+    } catch (error) {
+        errorMessage.value = error?.message || "Could not verify OTP."
+    } finally {
         loading.value = false
-        errorMessage.value = `Signed in, but failed to save profile: ${profileError.message}`
-        return
     }
-
-    authStore.user = verifyData.user
-    await authStore.fetchRoles()
-
-    loading.value = false
-    router.replace("/dashboard")
 }
 </script>
 

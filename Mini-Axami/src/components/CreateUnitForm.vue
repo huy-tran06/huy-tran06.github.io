@@ -12,26 +12,29 @@ const errorMessage = ref("")
 const successMessage = ref("")
 
 async function createUnit() {
-    loading.value = true
     errorMessage.value = ""
     successMessage.value = ""
+    loading.value = true
 
-    const { error } = await unitStore.createUnit({
-        name: name.value,
-        description: description.value
-    })
+    try {
+        const { error } = await unitStore.createUnit({
+            name: name.value,
+            description: description.value
+        })
 
-    if(error) {
-        errorMessage.value = error.message
+        if (error) {
+            errorMessage.value = error.message
+        } else {
+            successMessage.value = "Unit created successfully!"
+            emit("created")
+            name.value = ""
+            description.value = ""
+        }
+    } catch (error) {
+        errorMessage.value = error?.message || "Could not create unit."
+    } finally {
+        loading.value = false
     }
-    else {
-        successMessage.value = "Unit created successfully!"
-        emit("created")
-        name.value = ""
-        description.value = ""
-    }
-
-    loading.value = false
 }
 </script>
 

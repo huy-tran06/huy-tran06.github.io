@@ -36,6 +36,8 @@ const editErrorByTask = reactive({})
 const editSuccessByTask = reactive({})
 const editFormByTask = reactive({})
 const taskDetailsDialogByUnit = reactive({})
+const deleteDialogByUnit = reactive({})
+const deleteErrorByUnit = reactive({})
 const selectedTaskByUnit = reactive({})
 
 const submitButtonText = computed(() =>
@@ -135,13 +137,61 @@ async function approveTask(taskId, unitId) {
     actionErrorByTask.value[taskId] = ""
     actionLoadingByTask.value[taskId] = true
 
-    const { error } = await taskStore.approveSuggestedTask(taskId, unitId)
+    try {
+        const { error } = await taskStore.approveSuggestedTask(taskId, unitId)
 
-    if (error) {
-        actionErrorByTask.value[taskId] = error.message || "Could not approve task."
+        if (error) {
+            actionErrorByTask.value[taskId] = error.message || "Could not approve task."
+        }
+    } catch (error) {
+        actionErrorByTask.value[taskId] = error?.message || "Could not approve task."
+    } finally {
+        actionLoadingByTask.value[taskId] = false
+    }
+}
+
+function openDeleteDialog(task, unitId) {
+    selectedTaskByUnit[unitId] = task
+    deleteErrorByUnit[unitId] = ""
+    closeTaskDetails(unitId)
+    deleteDialogByUnit[unitId] = true
+}
+
+function closeDeleteDialog(unitId) {
+    deleteDialogByUnit[unitId] = false
+    deleteErrorByUnit[unitId] = ""
+}
+
+async function deleteTask(unitId) {
+    const task = currentTaskForUnit(unitId)
+
+    if (!task) {
+        closeDeleteDialog(unitId)
+        return
     }
 
-    actionLoadingByTask.value[taskId] = false
+    actionErrorByTask.value[task.id] = ""
+    actionLoadingByTask.value[task.id] = true
+
+    try {
+        const { error } = await taskStore.deleteTask(task.id, unitId)
+
+        if (error) {
+            actionErrorByTask.value[task.id] = error.message || "Could not delete task."
+            deleteErrorByUnit[unitId] = actionErrorByTask.value[task.id]
+        } else {
+            if (selectedTaskByUnit[unitId]?.id === task.id) {
+                selectedTaskByUnit[unitId] = null
+            }
+
+            closeDeleteDialog(unitId)
+        }
+    } catch (error) {
+        actionErrorByTask.value[task.id] = error?.message || "Could not delete task."
+        deleteErrorByUnit[unitId] = actionErrorByTask.value[task.id]
+    } finally {
+        actionLoadingByTask.value[task.id] = false
+    }
 }
 
 function openCreateTaskDialog(unitId) {
@@ -161,6 +211,17 @@ function closeTaskDetails(unitId) {
     taskDetailsDialogByUnit[unitId] = false
 }
 
+function currentTaskForUnit(unitId) {
+    const selectedTask = selectedTaskByUnit[unitId]
+
+    if (!selectedTask) {
+        return null
+    }
+
+    const tasks = taskStore.tasksByUnit[unitId] || []
+    return tasks.find((task) => task.id === selectedTask.id) || selectedTask
+}
+
 function canWorkerEditTask(task) {
     return isWorker.value && ["suggested", "created", "in_progress"].includes(task.status)
 }
@@ -175,6 +236,14 @@ function canCustomerEditTask(task) {
 
 function canEditTask(task) {
     return canWorkerEditTask(task) || canCustomerEditTask(task)
+}
+
+function canApproveTask(task) {
+    return isCustomer.value && task.status === "suggested"
+}
+
+function canDeleteTask(task) {
+    return canCustomerEditTask(task)
 }
 
 function statusOptionsForTask(task) {
@@ -212,7 +281,11 @@ async function loadWorkersIfCustomer(force = false) {
     await userStore.fetchWorkers()
 }
 
-function openEditDialog(task) {
+function openEditDialog(task, unitId = null) {
+    if (unitId !== null) {
+        closeTaskDetails(unitId)
+    }
+
     editFormByTask[task.id] = {
         title: task.title || "",
         description: task.description || "",
@@ -265,15 +338,22 @@ async function saveTaskEdit(task, unitId) {
     editErrorByTask[task.id] = ""
     editSuccessByTask[task.id] = ""
 
-    const { error } = await taskStore.updateTask(task.id, unitId, updates)
+    try {
+        const { data, error } = await taskStore.updateTask(task.id, unitId, updates)
 
-    if (error) {
-        editErrorByTask[task.id] = error.message || "Could not update task."
-    } else {
-        editSuccessByTask[task.id] = "Task updated."
+        if (error) {
+            editErrorByTask[task.id] = error.message || "Could not update task."
+        } else {
+            if (selectedTaskByUnit[unitId]?.id === task.id) {
+                selectedTaskByUnit[unitId] = data
+            }
+            editSuccessByTask[task.id] = "Task updated."
+        }
+    } catch (error) {
+        editErrorByTask[task.id] = error?.message || "Could not update task."
+    } finally {
+        editLoadingByTask[task.id] = false
     }
-
-    editLoadingByTask[task.id] = false
 }
 
 onMounted(async () => {
@@ -381,27 +461,6 @@ watch(
                                     </div>
 
                                     <template #append>
-                                        <v-btn
-                                            v-if="isCustomer && task.status === 'suggested'"
-                                            @click.stop="approveTask(task.id, unit.id)"
-                                            :loading="actionLoadingByTask[task.id]"
-                                            size="small"
-                                            color="primary"
-                                            variant="tonal"
-                                        >
-                                            Approve suggestion
-                                        </v-btn>
-
-                                        <v-btn
-                                            v-if="canEditTask(task)"
-                                            @click.stop="openEditDialog(task)"
-                                            size="small"
-                                            color="secondary"
-                                            variant="tonal"
-                                            class="ml-2"
-                                        >
-                                            Edit
-                                        </v-btn>
                                     </template>
                                     <v-dialog
                                         v-if="canEditTask(task)"
@@ -409,7 +468,17 @@ watch(
                                         max-width="640"
                                     >
                                         <v-card>
-                                            <v-card-title>Edit Task</v-card-title>
+                                            <div class="d-flex align-start justify-space-between pr-2">
+                                                <v-card-title>Edit Task</v-card-title>
+                                                <v-btn
+                                                    icon="fa:fas fa-xmark"
+                                                    variant="text"
+                                                    density="comfortable"
+                                                    class="task-dialog-close-btn mt-2"
+                                                    aria-label="Close edit task dialog"
+                                                    @click="closeEditDialog(task.id)"
+                                                />
+                                            </div>
                                             <v-card-text>
                                                 <template v-if="isCustomer">
                                                     <v-text-field
@@ -509,14 +578,11 @@ watch(
                                             <v-card-actions>
                                                 <v-spacer />
                                                 <v-btn
-                                                    variant="text"
-                                                    @click="closeEditDialog(task.id)"
-                                                >
-                                                    Close
-                                                </v-btn>
-                                                <v-btn
-                                                    color="primary"
+                                                    color="success"
+                                                    variant="flat"
+                                                    class="task-save-btn"
                                                     :loading="editLoadingByTask[task.id]"
+                                                    block
                                                     @click.stop="saveTaskEdit(task, unit.id)"
                                                 >
                                                     Save
@@ -531,47 +597,141 @@ watch(
                                 v-model="taskDetailsDialogByUnit[unit.id]"
                                 max-width="760"
                             >
-                                <v-card v-if="selectedTaskByUnit[unit.id]">
-                                    <v-card-title>{{ selectedTaskByUnit[unit.id].title }}</v-card-title>
+                                <v-card v-if="currentTaskForUnit(unit.id)">
+                                    <div class="d-flex align-start justify-space-between pr-2">
+                                        <v-card-title>{{ currentTaskForUnit(unit.id).title }}</v-card-title>
+                                        <v-btn
+                                            icon="fa:fas fa-xmark"
+                                            variant="text"
+                                            density="comfortable"
+                                            class="task-dialog-close-btn mt-2"
+                                            aria-label="Close task details"
+                                            @click="closeTaskDetails(unit.id)"
+                                        />
+                                    </div>
                                     <v-card-text>
                                         <div class="mb-2">
                                             <strong>Description:</strong>
-                                            {{ selectedTaskByUnit[unit.id].description || "No description." }}
+                                            {{ currentTaskForUnit(unit.id).description || "No description." }}
                                         </div>
                                         <div class="mb-2">
                                             <strong>Price:</strong>
-                                            {{ formatPrice(selectedTaskByUnit[unit.id].price) }}
+                                            {{ formatPrice(currentTaskForUnit(unit.id).price) }}
                                         </div>
                                         <div class="mb-2">
                                             <strong>Assigned worker:</strong>
-                                            {{ getUserName(selectedTaskByUnit[unit.id].assigned_worker_id, "Unassigned") }}
+                                            {{ getUserName(currentTaskForUnit(unit.id).assigned_worker_id, "Unassigned") }}
                                         </div>
                                         <div class="mb-2">
                                             <strong>Priority:</strong>
-                                            {{ formatPriorityLabel(selectedTaskByUnit[unit.id].priority) }}
+                                            {{ formatPriorityLabel(currentTaskForUnit(unit.id).priority) }}
                                         </div>
                                         <div class="mb-2">
                                             <strong>Status:</strong>
-                                            {{ formatStatusLabel(selectedTaskByUnit[unit.id].status) || "Not set" }}
+                                            {{ formatStatusLabel(currentTaskForUnit(unit.id).status) || "Not set" }}
                                         </div>
                                         <div class="mb-2">
                                             <strong>Created by:</strong>
-                                            {{ getUserName(selectedTaskByUnit[unit.id].created_by) }}
+                                            {{ getUserName(currentTaskForUnit(unit.id).created_by) }}
                                         </div>
                                         <div class="mb-2">
                                             <strong>Suggested by:</strong>
-                                            {{ getUserName(selectedTaskByUnit[unit.id].suggested_by) }}
+                                            {{ getUserName(currentTaskForUnit(unit.id).suggested_by) }}
                                         </div>
                                         <div class="mb-2">
                                             <strong>Comments:</strong>
-                                            {{ selectedTaskByUnit[unit.id].comments || "No comments." }}
+                                            {{ currentTaskForUnit(unit.id).comments || "No comments." }}
                                         </div>
                                     </v-card-text>
-                                    <v-card-actions>
-                                        <v-spacer />
-                                        <v-btn variant="text" @click="closeTaskDetails(unit.id)">
-                                            Close
+                                    <v-card-actions class="px-6 pb-6 task-dialog-actions">
+                                        <v-btn
+                                            v-if="canApproveTask(currentTaskForUnit(unit.id))"
+                                            @click="approveTask(currentTaskForUnit(unit.id).id, unit.id)"
+                                            :loading="actionLoadingByTask[currentTaskForUnit(unit.id).id]"
+                                            color="primary"
+                                            variant="tonal"
+                                            block
+                                            class="task-dialog-action-full"
+                                        >
+                                            Approve suggestion
                                         </v-btn>
+                                        <div
+                                            v-if="canEditTask(currentTaskForUnit(unit.id)) || canDeleteTask(currentTaskForUnit(unit.id))"
+                                            class="task-dialog-action-row"
+                                        >
+                                            <v-btn
+                                                v-if="canEditTask(currentTaskForUnit(unit.id))"
+                                                color="secondary"
+                                                variant="tonal"
+                                                class="task-dialog-action-half"
+                                                @click="openEditDialog(currentTaskForUnit(unit.id), unit.id)"
+                                            >
+                                                Edit
+                                            </v-btn>
+                                            <v-btn
+                                                v-if="canDeleteTask(currentTaskForUnit(unit.id))"
+                                                color="error"
+                                                variant="flat"
+                                                class="task-delete-btn task-dialog-action-half"
+                                                :loading="actionLoadingByTask[currentTaskForUnit(unit.id).id]"
+                                                @click="openDeleteDialog(currentTaskForUnit(unit.id), unit.id)"
+                                            >
+                                                Delete Task
+                                            </v-btn>
+                                        </div>
+                                    </v-card-actions>
+                                </v-card>
+                            </v-dialog>
+
+                            <v-dialog
+                                v-model="deleteDialogByUnit[unit.id]"
+                                max-width="520"
+                            >
+                                <v-card v-if="currentTaskForUnit(unit.id)">
+                                    <div class="d-flex align-start justify-space-between pr-2">
+                                        <v-card-title>Delete Task</v-card-title>
+                                        <v-btn
+                                            icon="fa:fas fa-xmark"
+                                            variant="text"
+                                            density="comfortable"
+                                            class="task-dialog-close-btn mt-2"
+                                            aria-label="Close delete task dialog"
+                                            @click="closeDeleteDialog(unit.id)"
+                                        />
+                                    </div>
+                                    <v-card-text>
+                                        Are you sure you want to delete
+                                        <strong>{{ currentTaskForUnit(unit.id).title }}</strong
+                                        >?
+
+                                        <v-alert
+                                            v-if="deleteErrorByUnit[unit.id]"
+                                            type="error"
+                                            variant="tonal"
+                                            class="mt-4"
+                                        >
+                                            {{ deleteErrorByUnit[unit.id] }}
+                                        </v-alert>
+                                    </v-card-text>
+                                    <v-card-actions class="px-6 pb-6">
+                                        <div class="task-dialog-action-row">
+                                            <v-btn
+                                                color="error"
+                                                variant="flat"
+                                                class="task-delete-btn task-dialog-action-half"
+                                                :loading="actionLoadingByTask[currentTaskForUnit(unit.id).id]"
+                                                @click="deleteTask(unit.id)"
+                                            >
+                                                Delete Task
+                                            </v-btn>
+                                            <v-btn
+                                                variant="tonal"
+                                                class="task-dialog-action-half"
+                                                @click="closeDeleteDialog(unit.id)"
+                                            >
+                                                Cancel
+                                            </v-btn>
+                                        </div>
                                     </v-card-actions>
                                 </v-card>
                             </v-dialog>
@@ -630,5 +790,39 @@ watch(
 
 .task-priority-default {
     border-color: #bdbdbd;
+}
+
+.task-dialog-close-btn {
+    align-self: flex-start;
+}
+
+.task-dialog-actions {
+    flex-direction: column;
+    gap: 12px;
+}
+
+.task-dialog-action-row {
+    display: flex;
+    width: 100%;
+    gap: 12px;
+}
+
+.task-dialog-action-full,
+.task-dialog-action-half {
+    min-width: 0;
+}
+
+.task-dialog-action-half {
+    flex: 1 1 0;
+}
+
+.task-delete-btn {
+    background-color: #c62828 !important;
+    color: #fff !important;
+}
+
+.task-save-btn {
+    background-color: #2e7d32 !important;
+    color: #fff !important;
 }
 </style>

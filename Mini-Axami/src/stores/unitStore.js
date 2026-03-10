@@ -8,26 +8,42 @@ export const useUnitStore = defineStore("units", {
 
     actions: {
         async fetchUnits() {
-            const { data, error } = await supabase
-            .from("units")
-            .select("*")
+            try {
+                const { data, error } = await supabase
+                    .from("units")
+                    .select("*")
 
-            if(!error) {
-                this.units = data
+                if (!error) {
+                    this.units = data
+                }
+
+                return { data, error }
+            } catch (error) {
+                return {
+                    data: null,
+                    error: { message: error?.message || "Could not load units." }
+                }
             }
         }, 
 
         async createUnit(payload) {
-            const { data, error } = await supabase
-            .from("units")
-            .insert(payload)
-            .select()
+            try {
+                const { data, error } = await supabase
+                    .from("units")
+                    .insert(payload)
+                    .select()
 
-            if(!error && data) {
-                this.units.push(data[0])
+                if (!error && data) {
+                    this.units.push(data[0])
+                }
+
+                return { data, error }
+            } catch (error) {
+                return {
+                    data: null,
+                    error: { message: error?.message || "Could not create unit." }
+                }
             }
-
-            return { data, error }
         }
     }
 })
