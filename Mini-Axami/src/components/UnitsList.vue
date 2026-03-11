@@ -150,6 +150,29 @@ async function approveTask(taskId, unitId) {
     }
 }
 
+async function rejectTask(taskId, unitId) {
+    actionErrorByTask.value[taskId] = ""
+    actionLoadingByTask.value[taskId] = true
+
+    try {
+        const { error } = await taskStore.rejectSuggestedTask(taskId, unitId)
+
+        if (error) {
+            actionErrorByTask.value[taskId] = error.message || "Could not reject task."
+        } else {
+            if (selectedTaskByUnit[unitId]?.id === taskId) {
+                selectedTaskByUnit[unitId] = null
+            }
+
+            closeTaskDetails(unitId)
+        }
+    } catch (error) {
+        actionErrorByTask.value[taskId] = error?.message || "Could not reject task."
+    } finally {
+        actionLoadingByTask.value[taskId] = false
+    }
+}
+
 function openDeleteDialog(task, unitId) {
     selectedTaskByUnit[unitId] = task
     deleteErrorByUnit[unitId] = ""
@@ -174,7 +197,7 @@ async function deleteTask(unitId) {
     actionLoadingByTask.value[task.id] = true
 
     try {
-        const { error } = await taskStore.deleteTask(task.id, unitId)
+        const { error } = await taskStore.deleteTask(task.id, unitId, task)
 
         if (error) {
             actionErrorByTask.value[task.id] = error.message || "Could not delete task."
@@ -223,7 +246,7 @@ function currentTaskForUnit(unitId) {
 }
 
 function canWorkerEditTask(task) {
-    return isWorker.value && ["suggested", "created", "in_progress"].includes(task.status)
+    return isWorker.value && ["suggested", "created", "accepted", "in_progress"].includes(task.status)
 }
 
 function canWorkerEditSuggestedTaskDetails(task) {
@@ -242,12 +265,26 @@ function canApproveTask(task) {
     return isCustomer.value && task.status === "suggested"
 }
 
+function canRejectTask(task) {
+    return isCustomer.value && task.status === "suggested"
+}
+
 function canDeleteTask(task) {
-    return canCustomerEditTask(task)
+    return canCustomerEditTask(task) || (
+        isWorker.value &&
+        task.status === "rejected" &&
+        task.suggested_by === authStore.user?.id
+    )
+}
+
+function deleteTaskLabel(task) {
+    return isWorker.value && task.status === "rejected"
+        ? "Delete Rejected Suggestion"
+        : "Delete Task"
 }
 
 function statusOptionsForTask(task) {
-    if (task.status === "created") {
+    if (["created", "accepted"].includes(task.status)) {
         return [
             { title: "In progress", value: "in_progress" },
             { title: "Completed", value: "completed" }
@@ -644,17 +681,29 @@ watch(
                                         </div>
                                     </v-card-text>
                                     <v-card-actions class="px-6 pb-6 task-dialog-actions">
-                                        <v-btn
-                                            v-if="canApproveTask(currentTaskForUnit(unit.id))"
-                                            @click="approveTask(currentTaskForUnit(unit.id).id, unit.id)"
-                                            :loading="actionLoadingByTask[currentTaskForUnit(unit.id).id]"
-                                            color="primary"
-                                            variant="tonal"
-                                            block
-                                            class="task-dialog-action-full"
+                                        <div
+                                            v-if="canApproveTask(currentTaskForUnit(unit.id)) || canRejectTask(currentTaskForUnit(unit.id))"
+                                            class="task-dialog-action-row"
                                         >
-                                            Approve suggestion
-                                        </v-btn>
+                                            <v-btn
+                                                v-if="canApproveTask(currentTaskForUnit(unit.id))"
+                                                @click="approveTask(currentTaskForUnit(unit.id).id, unit.id)"
+                                                :loading="actionLoadingByTask[currentTaskForUnit(unit.id).id]"
+                                                variant="flat"
+                                                class="task-save-btn task-dialog-action-half"
+                                            >
+                                                Approve Suggestion
+                                            </v-btn>
+                                            <v-btn
+                                                v-if="canRejectTask(currentTaskForUnit(unit.id))"
+                                                @click="rejectTask(currentTaskForUnit(unit.id).id, unit.id)"
+                                                :loading="actionLoadingByTask[currentTaskForUnit(unit.id).id]"
+                                                variant="flat"
+                                                class="task-delete-btn task-dialog-action-half"
+                                            >
+                                                Reject Suggestion
+                                            </v-btn>
+                                        </div>
                                         <div
                                             v-if="canEditTask(currentTaskForUnit(unit.id)) || canDeleteTask(currentTaskForUnit(unit.id))"
                                             class="task-dialog-action-row"
@@ -676,7 +725,7 @@ watch(
                                                 :loading="actionLoadingByTask[currentTaskForUnit(unit.id).id]"
                                                 @click="openDeleteDialog(currentTaskForUnit(unit.id), unit.id)"
                                             >
-                                                Delete Task
+                                                {{ deleteTaskLabel(currentTaskForUnit(unit.id)) }}
                                             </v-btn>
                                         </div>
                                     </v-card-actions>
@@ -722,7 +771,7 @@ watch(
                                                 :loading="actionLoadingByTask[currentTaskForUnit(unit.id).id]"
                                                 @click="deleteTask(unit.id)"
                                             >
-                                                Delete Task
+                                                {{ deleteTaskLabel(currentTaskForUnit(unit.id)) }}
                                             </v-btn>
                                             <v-btn
                                                 variant="tonal"

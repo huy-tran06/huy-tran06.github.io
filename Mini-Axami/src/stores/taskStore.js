@@ -103,31 +103,63 @@ export const useTaskStore = defineStore("tasks", {
             }
 
             try {
-                const { data, error } = await supabase
-                    .from("tasks")
-                    .update({ status: "in_progress" })
-                    .eq("id", taskId)
-                    .eq("unit_id", unitId)
-                    .eq("status", "suggested")
-                    .select()
-                    .single()
+                const { error } = await supabase.rpc("approve_suggested_task", {
+                    p_task_id: taskId,
+                    p_unit_id: unitId
+                })
 
-                if (!error && data) {
+                if (!error) {
+                    const updatedTask = {
+                        ...(this.tasksByUnit[unitId] || []).find((task) => task.id === taskId),
+                        status: "accepted"
+                    }
                     const unitTasks = this.tasksByUnit[unitId] || []
                     this.tasksByUnit[unitId] = unitTasks.map((task) =>
-                        task.id === taskId ? data : task
+                        task.id === taskId ? updatedTask : task
                     )
 
                     this.tasks = this.tasks.map((task) =>
-                        task.id === taskId ? data : task
+                        task.id === taskId ? updatedTask : task
                     )
                 }
 
-                return { data, error }
+                return { data: null, error }
             } catch (error) {
                 return {
                     data: null,
                     error: { message: error?.message || "Could not approve task." }
+                }
+            }
+        },
+
+        async rejectSuggestedTask(taskId, unitId) {
+            const auth = useAuthStore()
+
+            if (!auth.user || auth.role !== "customer") {
+                return {
+                    data: null,
+                    error: { message: "Only customers can reject suggested tasks." }
+                }
+            }
+
+            try {
+                const { error } = await supabase.rpc("reject_suggested_task", {
+                    p_task_id: taskId,
+                    p_unit_id: unitId
+                })
+
+                if (!error) {
+                    const unitTasks = this.tasksByUnit[unitId] || []
+                    this.tasksByUnit[unitId] = unitTasks.filter((task) => task.id !== taskId)
+
+                    this.tasks = this.tasks.filter((task) => task.id !== taskId)
+                }
+
+                return { data: null, error }
+            } catch (error) {
+                return {
+                    data: null,
+                    error: { message: error?.message || "Could not reject task." }
                 }
             }
         },
@@ -171,13 +203,26 @@ export const useTaskStore = defineStore("tasks", {
             }
         },
 
-        async deleteTask(taskId, unitId) {
+        async deleteTask(taskId, unitId, task = null) {
             const auth = useAuthStore()
 
-            if (!auth.user || auth.role !== "customer") {
+            if (!auth.user) {
                 return {
                     data: null,
-                    error: { message: "Only customers can delete tasks." }
+                    error: { message: "You must be logged in to delete tasks." }
+                }
+            }
+
+            const canCustomerDelete = auth.role === "customer"
+            const canWorkerDeleteRejectedSuggestion =
+                auth.role === "worker" &&
+                task?.status === "rejected" &&
+                task?.suggested_by === auth.user.id
+
+            if (!canCustomerDelete && !canWorkerDeleteRejectedSuggestion) {
+                return {
+                    data: null,
+                    error: { message: "You do not have permission to delete this task." }
                 }
             }
 
@@ -187,7 +232,6 @@ export const useTaskStore = defineStore("tasks", {
                     .delete()
                     .eq("id", taskId)
                     .eq("unit_id", unitId)
-                    .neq("status", "suggested")
                     .select()
                     .maybeSingle()
 
