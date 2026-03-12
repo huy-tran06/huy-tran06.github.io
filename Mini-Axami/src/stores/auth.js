@@ -1,6 +1,8 @@
 import { defineStore } from "pinia"
 import { supabase } from "../lib/supabase"
 
+let authStateSubscription = null
+
 export const useAuthStore = defineStore("auth", {
     state: () => ({
         user: null,
@@ -10,17 +12,32 @@ export const useAuthStore = defineStore("auth", {
     actions: {
         async init() {
             this.loading = true
-            const getUser = await supabase.auth.getUser()
-            this.user = getUser.data.user ?? null
+            try {
+                const getUser = await supabase.auth.getUser()
+                this.user = getUser.data.user ?? null
 
-            await this.fetchRoles()
-
-            supabase.auth.onAuthStateChange(async (_event, session) => {
-                this.user = session?.user ?? null
                 await this.fetchRoles()
-            })
 
-            this.loading = false
+                if (!authStateSubscription) {
+                    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+                        this.user = session?.user ?? null
+                        this.role = null
+
+                        // Supabase warns against awaiting other Supabase calls directly inside
+                        // onAuthStateChange because it can block subsequent client requests.
+                        globalThis.setTimeout(() => {
+                            this.fetchRoles()
+                        }, 0)
+                    })
+
+                    authStateSubscription = data.subscription
+                }
+            } catch (_error) {
+                this.user = null
+                this.role = null
+            } finally {
+                this.loading = false
+            }
         },
 
         async fetchRoles() {
@@ -29,25 +46,34 @@ export const useAuthStore = defineStore("auth", {
                 return
             }
 
-            const result = await supabase
-                .from("users")
-                .select("role")
-                .eq("id", this.user.id)
-                .single()
+            try {
+                const result = await supabase
+                    .from("users")
+                    .select("role")
+                    .eq("id", this.user.id)
+                    .single()
 
-            const data = result.data
-            const error = result.error
+                const data = result.data
+                const error = result.error
 
-            if(!error && data) {
-                this.role = data.role
+                if(!error && data) {
+                    this.role = data.role
+                    return
+                }
+            } catch (_error) {
+                // Fall through to reset the role on timed-out or failed requests.
             }
-            else {
-                this.role = null
-            }
+
+            this.role = null
         },
 
         async logout() {
-            await supabase.auth.signOut()
+            try {
+                await supabase.auth.signOut()
+            } finally {
+                this.user = null
+                this.role = null
+            }
         }
     }
 })

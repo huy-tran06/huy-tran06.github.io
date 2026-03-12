@@ -18,21 +18,32 @@ export const useUserStore = defineStore("users", {
         this.workersLoading = true
         this.workersError = ""
 
-        const { data, error } = await supabase
-            .from("users")
-            .select("id, full_name")
-            .eq("role", "worker")
-            .order("full_name", { ascending: true })
+        try {
+            const { data, error } = await supabase
+                .from("users")
+                .select("id, full_name")
+                .eq("role", "worker")
+                .order("full_name", { ascending: true })
 
-        if (!error) {
-            this.workers = data || []
-        } else {
+            if (!error) {
+                this.workers = data || []
+            } else {
+                this.workers = []
+                this.workersError = error.message || "Could not load workers."
+            }
+
+            return { data, error }
+        } catch (error) {
             this.workers = []
-            this.workersError = error.message || "Could not load workers."
-        }
+            this.workersError = error?.message || "Could not load workers."
 
-        this.workersLoading = false
-        return { data, error }
+            return {
+                data: null,
+                error: { message: this.workersError }
+            }
+        } finally {
+            this.workersLoading = false
+        }
     },
 
     async fetchUsersByIds(ids = []) {
@@ -54,22 +65,29 @@ export const useUserStore = defineStore("users", {
             }
         }
 
-        const { data, error } = await supabase
-            .from("users")
-            .select("id, full_name")
-            .in("id", missingIds)
+        try {
+            const { data, error } = await supabase
+                .from("users")
+                .select("id, full_name")
+                .in("id", missingIds)
 
-        if (error) {
-            return { data: null, error }
-        }
+            if (error) {
+                return { data: null, error }
+            }
 
-        for (const user of data || []) {
-            this.usersById[user.id] = user
-        }
+            for (const user of data || []) {
+                this.usersById[user.id] = user
+            }
 
-        return {
-            data: uniqueIds.map((id) => this.usersById[id]).filter(Boolean),
-            error: null
+            return {
+                data: uniqueIds.map((id) => this.usersById[id]).filter(Boolean),
+                error: null
+            }
+        } catch (error) {
+            return {
+                data: null,
+                error: { message: error?.message || "Could not load users." }
+            }
         }
     },
 

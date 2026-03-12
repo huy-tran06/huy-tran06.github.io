@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref, watch } from "vue"
 import CreateTaskForm from './CreateTaskForm.vue';
 import { useTaskStore } from "../stores/taskStore"
+import { useUnitStore } from "../stores/unitStore"
 import { useAuthStore } from "../stores/auth"
 import { useUserStore } from "../stores/userStore"
 
@@ -17,11 +18,13 @@ const props = defineProps({
 })
 
 const taskStore = useTaskStore()
+const unitStore = useUnitStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 
 const isCustomer = computed(() => authStore.role === "customer")
 const isWorker = computed(() => authStore.role === "worker")
+const canEditUnits = computed(() => authStore.role === "customer")
 const canSubmitTask = computed(() =>
     authStore.role === "customer" || authStore.role === "worker"
 )
@@ -39,6 +42,12 @@ const taskDetailsDialogByUnit = reactive({})
 const deleteDialogByUnit = reactive({})
 const deleteErrorByUnit = reactive({})
 const selectedTaskByUnit = reactive({})
+const unitDetailsDialogByUnit = reactive({})
+const editDialogByUnit = reactive({})
+const editLoadingByUnit = reactive({})
+const editErrorByUnit = reactive({})
+const editSuccessByUnit = reactive({})
+const editFormByUnit = reactive({})
 
 const submitButtonText = computed(() =>
     authStore.role === "worker" ? "Suggest Task" : "Create Task"
@@ -99,6 +108,33 @@ function areTasksVisible(unitId) {
 
 function toggleTasks(unitId) {
     tasksVisibleByUnit[unitId] = !tasksVisibleByUnit[unitId]
+}
+
+function openUnitDetails(unit) {
+    unitDetailsDialogByUnit[unit.id] = true
+}
+
+function closeUnitDetails(unitId) {
+    unitDetailsDialogByUnit[unitId] = false
+}
+
+function openUnitEditDialog(unit) {
+    closeUnitDetails(unit.id)
+    editFormByUnit[unit.id] = {
+        name: unit.name || "",
+        description: unit.description || ""
+    }
+    editErrorByUnit[unit.id] = ""
+    editSuccessByUnit[unit.id] = ""
+    editDialogByUnit[unit.id] = true
+}
+
+function closeUnitEditDialog(unitId) {
+    editDialogByUnit[unitId] = false
+}
+
+function currentUnit(unitId) {
+    return props.units.find((unit) => unit.id === unitId) || unitStore.units.find((unit) => unit.id === unitId) || null
 }
 
 function formatStatusLabel(status) {
@@ -393,6 +429,42 @@ async function saveTaskEdit(task, unitId) {
     }
 }
 
+async function saveUnitEdit(unitId) {
+    const form = editFormByUnit[unitId]
+
+    if (!form) {
+        return
+    }
+
+    editLoadingByUnit[unitId] = true
+    editErrorByUnit[unitId] = ""
+    editSuccessByUnit[unitId] = ""
+
+    try {
+        const { data, error } = await unitStore.updateUnit(unitId, {
+            name: form.name,
+            description: form.description || null
+        })
+
+        if (error) {
+            editErrorByUnit[unitId] = error.message || "Could not update unit."
+        } else {
+            editSuccessByUnit[unitId] = "Unit updated."
+
+            if (data) {
+                editFormByUnit[unitId] = {
+                    name: data.name || "",
+                    description: data.description || ""
+                }
+            }
+        }
+    } catch (error) {
+        editErrorByUnit[unitId] = error?.message || "Could not update unit."
+    } finally {
+        editLoadingByUnit[unitId] = false
+    }
+}
+
 onMounted(async () => {
     await loadTasks()
     await loadWorkersIfCustomer()
@@ -437,19 +509,144 @@ watch(
                 :key="unit.id"
                 cols="12"
             >
-                <v-card elevation="2" class="mb-4">
-                    <v-card-title>{{ unit.name }}</v-card-title>
+                <v-card
+                    elevation="2"
+                    class="mb-4 unit-card-bordered"
+                    :class="{ 'unit-card-hoverable': !areTasksVisible(unit.id) }"
+                >
+                    <v-card-title
+                        class="unit-card-title"
+                        :class="{ 'unit-card-title-clickable': !areTasksVisible(unit.id) }"
+                        @click="!areTasksVisible(unit.id) && openUnitDetails(unit)"
+                    >
+                        <span>{{ unit.name }}</span>
+                        <v-btn
+                            :icon="
+                                areTasksVisible(unit.id)
+                                    ? 'fa:fas fa-angle-up'
+                                    : 'fa:fas fa-angle-down'
+                            "
+                            variant="text"
+                            density="comfortable"
+                            color="primary"
+                            :aria-label="
+                                areTasksVisible(unit.id)
+                                    ? 'Hide tasks'
+                                    : 'Show tasks'
+                            "
+                            @click.stop="toggleTasks(unit.id)"
+                        />
+                    </v-card-title>
 
                     <v-card-text>
-                        <v-btn
-                            size="small"
-                            variant="outlined"
-                            color="primary"
-                            class="mb-3"
-                            @click="toggleTasks(unit.id)"
+                        <v-dialog
+                            v-model="unitDetailsDialogByUnit[unit.id]"
+                            max-width="640"
                         >
-                            {{ areTasksVisible(unit.id) ? "Hide Tasks" : "Show Tasks" }}
-                        </v-btn>
+                            <v-card v-if="currentUnit(unit.id)">
+                                <div class="d-flex align-start justify-space-between pr-2">
+                                    <v-card-title>{{ currentUnit(unit.id).name }}</v-card-title>
+                                    <v-btn
+                                        icon="fa:fas fa-xmark"
+                                        variant="text"
+                                        density="comfortable"
+                                        class="task-dialog-close-btn mt-2"
+                                        aria-label="Close unit details"
+                                        @click="closeUnitDetails(unit.id)"
+                                    />
+                                </div>
+                                <v-card-text>
+                                    <div class="mb-2">
+                                        <strong>Name:</strong>
+                                        {{ currentUnit(unit.id).name }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Description:</strong>
+                                        {{ currentUnit(unit.id).description || "No description." }}
+                                    </div>
+                                </v-card-text>
+                                <v-card-actions
+                                    v-if="canEditUnits"
+                                    class="px-6 pb-6 task-dialog-actions"
+                                >
+                                    <div class="task-dialog-action-row">
+                                        <v-btn
+                                            color="secondary"
+                                            variant="tonal"
+                                            class="task-dialog-action-full"
+                                            block
+                                            @click="openUnitEditDialog(currentUnit(unit.id))"
+                                        >
+                                            Edit
+                                        </v-btn>
+                                    </div>
+                                </v-card-actions>
+                            </v-card>
+                        </v-dialog>
+
+                        <v-dialog
+                            v-if="canEditUnits"
+                            v-model="editDialogByUnit[unit.id]"
+                            max-width="640"
+                        >
+                            <v-card v-if="currentUnit(unit.id)">
+                                <div class="d-flex align-start justify-space-between pr-2">
+                                    <v-card-title>Edit Unit</v-card-title>
+                                    <v-btn
+                                        icon="fa:fas fa-xmark"
+                                        variant="text"
+                                        density="comfortable"
+                                        class="task-dialog-close-btn mt-2"
+                                        aria-label="Close edit unit dialog"
+                                        @click="closeUnitEditDialog(unit.id)"
+                                    />
+                                </div>
+                                <v-card-text>
+                                    <v-text-field
+                                        v-model="editFormByUnit[unit.id].name"
+                                        label="Unit Name"
+                                    />
+
+                                    <v-textarea
+                                        v-model="editFormByUnit[unit.id].description"
+                                        label="Description"
+                                        rows="3"
+                                        auto-grow
+                                    />
+
+                                    <v-alert
+                                        v-if="editSuccessByUnit[unit.id]"
+                                        type="success"
+                                        variant="tonal"
+                                        class="mt-2"
+                                    >
+                                        {{ editSuccessByUnit[unit.id] }}
+                                    </v-alert>
+
+                                    <v-alert
+                                        v-if="editErrorByUnit[unit.id]"
+                                        type="error"
+                                        variant="tonal"
+                                        class="mt-2"
+                                    >
+                                        {{ editErrorByUnit[unit.id] }}
+                                    </v-alert>
+                                </v-card-text>
+                                <v-card-actions>
+                                    <v-spacer />
+                                    <v-btn
+                                        color="success"
+                                        variant="flat"
+                                        class="task-save-btn"
+                                        :loading="editLoadingByUnit[unit.id]"
+                                        block
+                                        @click.stop="saveUnitEdit(unit.id)"
+                                    >
+                                        Save
+                                    </v-btn>
+                                </v-card-actions>
+                            </v-card>
+                        </v-dialog>
 
                         <v-divider class="my-4" />
 
@@ -820,6 +1017,32 @@ watch(
 </template>
 
 <style scoped>
+.unit-card-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.unit-card-title-clickable {
+    cursor: pointer;
+}
+
+.unit-card-bordered {
+    border: 2px solid #ffffff;
+    border-radius: 16px;
+}
+
+.unit-card-hoverable {
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.unit-card-hoverable:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 6px 18px rgba(255, 255, 255, 0.16);
+    transform: translateY(-1px);
+}
+
 .task-list-item {
     border-width: 2px;
     border-style: solid;

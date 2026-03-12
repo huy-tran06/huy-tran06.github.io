@@ -39,6 +39,7 @@ export const useTaskStore = defineStore("tasks", {
 
         async createTask(payload){
             const auth = useAuthStore()
+
             if (!auth.user) {
                 return {
                     data: null,
@@ -227,30 +228,20 @@ export const useTaskStore = defineStore("tasks", {
             }
 
             try {
-                const { data, error } = await supabase
+                const { error } = await supabase
                     .from("tasks")
                     .delete()
                     .eq("id", taskId)
                     .eq("unit_id", unitId)
-                    .select()
-                    .maybeSingle()
 
-                if (!error && data) {
+                if (!error) {
                     const unitTasks = this.tasksByUnit[unitId] || []
                     this.tasksByUnit[unitId] = unitTasks.filter((task) => task.id !== taskId)
                     this.tasks = this.tasks.filter((task) => task.id !== taskId)
+                    return { data: null, error: null }
                 }
 
-                if (!error && !data) {
-                    return {
-                        data: null,
-                        error: {
-                            message: "Task was not deleted. You may not have permission for this task."
-                        }
-                    }
-                }
-
-                return { data, error }
+                return { data: null, error }
             } catch (error) {
                 return {
                     data: null,
