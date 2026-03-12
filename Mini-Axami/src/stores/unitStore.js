@@ -12,6 +12,7 @@ export const useUnitStore = defineStore("units", {
                 const { data, error } = await supabase
                     .from("units")
                     .select("*")
+                    .order("created_at", { ascending: true })
 
                 if (!error) {
                     this.units = data
@@ -75,6 +76,38 @@ export const useUnitStore = defineStore("units", {
                 return {
                     data: null,
                     error: { message: error?.message || "Could not update unit." }
+                }
+            }
+        },
+
+        async deleteUnit(unitId) {
+            try {
+                const { data, error } = await supabase
+                    .from("units")
+                    .delete()
+                    .eq("id", unitId)
+                    .select()
+                    .maybeSingle()
+
+                if (!error && data) {
+                    this.units = this.units.filter((unit) => unit.id !== unitId)
+                    return { data, error: null }
+                }
+
+                if (!error && !data) {
+                    return {
+                        data: null,
+                        error: {
+                            message: "Unit was not deleted. It may not be empty or you may not have permission for this unit."
+                        }
+                    }
+                }
+
+                return { data, error }
+            } catch (error) {
+                return {
+                    data: null,
+                    error: { message: error?.message || "Could not delete unit." }
                 }
             }
         }

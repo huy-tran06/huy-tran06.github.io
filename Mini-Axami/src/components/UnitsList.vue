@@ -48,6 +48,9 @@ const editLoadingByUnit = reactive({})
 const editErrorByUnit = reactive({})
 const editSuccessByUnit = reactive({})
 const editFormByUnit = reactive({})
+const deleteUnitDialogByUnit = reactive({})
+const deleteLoadingByUnit = reactive({})
+const deleteUnitErrorByUnit = reactive({})
 
 const submitButtonText = computed(() =>
     authStore.role === "worker" ? "Suggest Task" : "Create Task"
@@ -131,6 +134,21 @@ function openUnitEditDialog(unit) {
 
 function closeUnitEditDialog(unitId) {
     editDialogByUnit[unitId] = false
+}
+
+function canDeleteUnit(unitId) {
+    return isCustomer.value && !tasksForUnit(unitId).length
+}
+
+function openUnitDeleteDialog(unitId) {
+    closeUnitDetails(unitId)
+    deleteUnitErrorByUnit[unitId] = ""
+    deleteUnitDialogByUnit[unitId] = true
+}
+
+function closeUnitDeleteDialog(unitId) {
+    deleteUnitDialogByUnit[unitId] = false
+    deleteUnitErrorByUnit[unitId] = ""
 }
 
 function currentUnit(unitId) {
@@ -465,6 +483,31 @@ async function saveUnitEdit(unitId) {
     }
 }
 
+async function deleteUnit(unitId) {
+    if (!canDeleteUnit(unitId)) {
+        deleteUnitErrorByUnit[unitId] = "Only empty units can be deleted."
+        return
+    }
+
+    deleteLoadingByUnit[unitId] = true
+    deleteUnitErrorByUnit[unitId] = ""
+
+    try {
+        const { error } = await unitStore.deleteUnit(unitId)
+
+        if (error) {
+            deleteUnitErrorByUnit[unitId] = error.message || "Could not delete unit."
+        } else {
+            delete taskStore.tasksByUnit[unitId]
+            closeUnitDeleteDialog(unitId)
+        }
+    } catch (error) {
+        deleteUnitErrorByUnit[unitId] = error?.message || "Could not delete unit."
+    } finally {
+        deleteLoadingByUnit[unitId] = false
+    }
+}
+
 onMounted(async () => {
     await loadTasks()
     await loadWorkersIfCustomer()
@@ -564,6 +607,12 @@ watch(
                                         <strong>Description:</strong>
                                         {{ currentUnit(unit.id).description || "No description." }}
                                     </div>
+                                    <div
+                                        v-if="canEditUnits && !canDeleteUnit(unit.id)"
+                                        class="text-medium-emphasis"
+                                    >
+                                        Units can only be deleted when they have no tasks.
+                                    </div>
                                 </v-card-text>
                                 <v-card-actions
                                     v-if="canEditUnits"
@@ -573,11 +622,19 @@ watch(
                                         <v-btn
                                             color="secondary"
                                             variant="tonal"
-                                            class="task-dialog-action-full"
-                                            block
+                                            class="task-dialog-action-half"
                                             @click="openUnitEditDialog(currentUnit(unit.id))"
                                         >
                                             Edit
+                                        </v-btn>
+                                        <v-btn
+                                            v-if="canDeleteUnit(unit.id)"
+                                            color="error"
+                                            variant="flat"
+                                            class="task-delete-btn task-dialog-action-half"
+                                            @click="openUnitDeleteDialog(unit.id)"
+                                        >
+                                            Delete Unit
                                         </v-btn>
                                     </div>
                                 </v-card-actions>
@@ -644,6 +701,60 @@ watch(
                                     >
                                         Save
                                     </v-btn>
+                                </v-card-actions>
+                            </v-card>
+                        </v-dialog>
+
+                        <v-dialog
+                            v-if="canEditUnits"
+                            v-model="deleteUnitDialogByUnit[unit.id]"
+                            max-width="520"
+                        >
+                            <v-card v-if="currentUnit(unit.id)">
+                                <div class="d-flex align-start justify-space-between pr-2">
+                                    <v-card-title>Delete Unit</v-card-title>
+                                    <v-btn
+                                        icon="fa:fas fa-xmark"
+                                        variant="text"
+                                        density="comfortable"
+                                        class="task-dialog-close-btn mt-2"
+                                        aria-label="Close delete unit dialog"
+                                        @click="closeUnitDeleteDialog(unit.id)"
+                                    />
+                                </div>
+                                <v-card-text>
+                                    Are you sure you want to delete
+                                    <strong>{{ currentUnit(unit.id).name }}</strong
+                                    >?
+
+                                    <v-alert
+                                        v-if="deleteUnitErrorByUnit[unit.id]"
+                                        type="error"
+                                        variant="tonal"
+                                        class="mt-4"
+                                    >
+                                        {{ deleteUnitErrorByUnit[unit.id] }}
+                                    </v-alert>
+                                </v-card-text>
+                                <v-card-actions class="px-6 pb-6">
+                                    <div class="task-dialog-action-row">
+                                        <v-btn
+                                            color="error"
+                                            variant="flat"
+                                            class="task-delete-btn task-dialog-action-half"
+                                            :loading="deleteLoadingByUnit[unit.id]"
+                                            @click="deleteUnit(unit.id)"
+                                        >
+                                            Delete Unit
+                                        </v-btn>
+                                        <v-btn
+                                            variant="tonal"
+                                            class="task-dialog-action-half"
+                                            @click="closeUnitDeleteDialog(unit.id)"
+                                        >
+                                            Cancel
+                                        </v-btn>
+                                    </div>
                                 </v-card-actions>
                             </v-card>
                         </v-dialog>
