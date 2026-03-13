@@ -23,8 +23,6 @@ export const useAuthStore = defineStore("auth", {
                         this.user = session?.user ?? null
                         this.role = null
 
-                        // Supabase warns against awaiting other Supabase calls directly inside
-                        // onAuthStateChange because it can block subsequent client requests.
                         globalThis.setTimeout(() => {
                             this.fetchRoles()
                         }, 0)
@@ -61,7 +59,6 @@ export const useAuthStore = defineStore("auth", {
                     return
                 }
             } catch (_error) {
-                // Fall through to reset the role on timed-out or failed requests.
             }
 
             this.role = null
